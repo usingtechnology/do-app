@@ -27,13 +27,13 @@ jobs:
         if: github.event_name == 'pull_request'
         run: echo "tag=pr" >> $GITHUB_ENV
       - name: "set dev environment variables"
-        if: github.event_name == 'push' && github.push.ref == 'refs/heads/develop'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
         run: echo "tag=dev" >> $GITHUB_ENV
       - name: "set test environment variables"
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/test')
         run: echo "tag=test" >> $GITHUB_ENV
       - name: "set prod environment variables"
-        if: github.event_name == 'push' && github.push.ref == 'refs/heads/main'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: echo "tag=prod" >> $GITHUB_ENV
           
        # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
