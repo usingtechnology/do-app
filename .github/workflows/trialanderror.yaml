@@ -46,7 +46,7 @@ jobs:
     
     steps:
       - name: Run a one-line script
-        run: echo Hello, holder! Do stuff in ${env:tag}
+        run: echo Hello, holder! Do stuff in ${{ env.tag }}
         
   build-verifier:
     # The type of runner that the job will run on
