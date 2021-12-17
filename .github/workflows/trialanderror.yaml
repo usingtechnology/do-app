@@ -82,7 +82,7 @@ jobs:
            
     outputs:
      holdertags: ${{ steps.holdertags.outputs.tags }}
-     verifiertags: ${{ step.verifiertags.outputs.tags }}
+     verifiertags: ${{ steps.verifiertags.outputs.tags }}
       
 
   build-holder:
