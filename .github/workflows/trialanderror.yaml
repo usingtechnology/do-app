@@ -151,7 +151,7 @@ jobs:
       - name: Check out config repo
         uses: actions/checkout@v2
         with:
-          repository: https://github.com/usingtechnology/do-config
+          repository: usingtechnology/do-config
 
       - name: Update image ID and commit change
         shell: bash
