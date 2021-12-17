@@ -55,7 +55,35 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner}}
           password: ${{ secrets.GITHUB_TOKEN }}
-         
+          
+      - name: Prepare docker tags for holder image
+        id: holdertags
+        uses: docker/metadata-action@v3
+        with:
+          images: ghcr.io/usingtechnology/do-app/traction-holder
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=ref,event=tag
+            type=sha
+            type=raw,value=${{ env.tag }}   
+          
+      - name: Prepare docker tags for holder image
+        id: verifiertags
+        uses: docker/metadata-action@v3
+        with:
+          images: ghcr.io/usingtechnology/do-app/verifier-holder
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=ref,event=tag
+            type=sha
+            type=raw,value=${{ env.tag }}   
+           
+    outputs:
+     holdertags: ${{ steps.holdertags.outputs.tags }}
+     verifiertags: ${{ step.verifiertags.outputs.tags }}
+      
 
   build-holder:
      # The type of runner that the job will run on
@@ -63,38 +91,24 @@ jobs:
     needs: init
     
     steps:
-      - name: Run a one-line script
-        run: echo Hello, holder! Do stuff in ${{ jobs.init.env.tag }}
-
       - name: Build and push holder image
         uses: docker/build-push-action@v2
         with:
           context: ./services/holder
           push: true
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=ref,event=tag
-            type=sha
-            type=raw,value=${{ jobs.init.env.tag }}
+          tags: ${{ needs.init.outputs.holdertags }}
       
   build-verifier:
     # The type of runner that the job will run on
     runs-on: ubuntu-20.04
     needs: init 
     
-    steps:
-      
+    steps:      
       - name: Build and push verifier image
         uses: docker/build-push-action@v2
         with:
           context: ./services/verifier
           push: true
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=ref,event=tag
-            type=sha
-            type=raw,value=${{ jobs.init.env.tag }}
+          tags: ${{ needs.init.outputs.verifiertags }}
 
 
