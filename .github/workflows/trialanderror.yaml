@@ -20,7 +20,7 @@ on:
 
 jobs:
     
-  checkout:
+  init:
     runs-on: ubuntu-20.04
     steps:
       - name: "set pr environment variables"
@@ -36,24 +36,99 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: echo "tag=prod" >> $GITHUB_ENV
           
-       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - name: Prepare docker tags for holder image
+        id: holdertags
+        uses: docker/metadata-action@v3
+        with:
+          images: ghcr.io/usingtechnology/do-app/traction-holder
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=ref,event=tag
+            type=sha
+            type=raw,value=${{ env.tag }}   
+          
+      - name: Prepare docker tags for holder image
+        id: verifiertags
+        uses: docker/metadata-action@v3
+        with:
+          images: ghcr.io/usingtechnology/do-app/verifier-holder
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=ref,event=tag
+            type=sha
+            type=raw,value=${{ env.tag }}   
+           
+    outputs:
+     holdertags: ${{ steps.holdertags.outputs.tags }}
+     verifiertags: ${{ steps.verifiertags.outputs.tags }}
+      
 
   build-holder:
      # The type of runner that the job will run on
-    runs-on: ubuntu-latest
-    needs: checkout
+    runs-on: ubuntu-20.04
+    needs: init
     
     steps:
-      - name: Run a one-line script
-        run: echo Hello, holder! Do stuff in ${{ env.tag }}
+       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner}}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
         
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner}}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push holder image
+        uses: docker/build-push-action@v2
+        with:
+          context: ./services/holder
+          push: true
+          tags: ${{ needs.init.outputs.holdertags }}
+      
   build-verifier:
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
-    needs: checkout 
+    runs-on: ubuntu-20.04
+    needs: init 
     
-    steps:
-      - name: Run a one-line script
-        run: echo Hello, verifier!
+    steps:      
+        # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner}}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner}}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push verifier image
+        uses: docker/build-push-action@v2
+        with:
+          context: ./services/verifier
+          push: true
+          tags: ${{ needs.init.outputs.verifiertags }}
+
 
