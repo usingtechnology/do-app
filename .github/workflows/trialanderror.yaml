@@ -52,7 +52,7 @@ jobs:
         id: verifiertags
         uses: docker/metadata-action@v3
         with:
-          images: ghcr.io/usingtechnology/do-app/verifier-holder
+          images: ghcr.io/usingtechnology/do-app/traction-verifier
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -63,6 +63,7 @@ jobs:
     outputs:
      holdertags: ${{ steps.holdertags.outputs.tags }}
      verifiertags: ${{ steps.verifiertags.outputs.tags }}
+     tag: ${{ env.tag }}
       
 
   build-holder:
@@ -92,12 +93,16 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push holder image
+        id: builder
         uses: docker/build-push-action@v2
         with:
           context: ./services/holder
           push: true
           tags: ${{ needs.init.outputs.holdertags }}
-      
+    
+    outputs:
+     digest: ${{ steps.builder.outputs.digest }}
+    
   build-verifier:
     # The type of runner that the job will run on
     runs-on: ubuntu-20.04
@@ -125,10 +130,39 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push verifier image
+        id: builder
         uses: docker/build-push-action@v2
         with:
           context: ./services/verifier
           push: true
           tags: ${{ needs.init.outputs.verifiertags }}
+    
+    outputs:
+     digest: ${{ steps.builder.outputs.digest }}
 
+  update-config:
+    runs-on: ubuntu-20.04
+    needs: 
+      - init
+      - build-holder
+      - build-verifier
+    if: ${{ always() && contains(needs.*.result, 'success') && !(contains(needs.*.result, 'failure')) }}
+    
+    steps:  
+      - name: Check out config repo
+        uses: actions/checkout@v2
+        with:
+          ssh-key: ${{ secrets.MANIFEST_REPO_DEPLOY_KEY }}
+          repository: ${{ secrets.MANIFEST_REPO }}
 
+      - name: Update image ID and commit change
+        shell: bash
+        run: |
+          ls -l
+          yq eval '.holder.image.tag = "${{needs.build-holder.outputs.digest }}"' -i values-${{ needs.init.outputs.tag }}.yaml
+          yq eval '.verifier.image.tag = "${{needs.build-verifier.outputs.digest }}"' -i values-${{ needs.init.outputs.tag }}.yaml
+          cat values-${{ needs.init.outputs.tag }}.yaml
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -am "Update image ID for ${{ env.TAG_NAME }}"
+          git push origin
