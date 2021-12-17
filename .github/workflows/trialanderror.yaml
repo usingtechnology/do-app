@@ -159,6 +159,7 @@ jobs:
           ls -l
           yq eval '.holder.image.tag = "${{needs.build-holder.outputs.digest }}"' -i values-${{ needs.init.outputs.tag }}.yaml
           yq eval '.verifer.image.tag = "${{needs.build-verifier.outputs.digest }}"' -i values-${{ needs.init.outputs.tag }}.yaml
+          cat values-${{ needs.init.outputs.tag }}.yaml
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git commit -am "Update image IDs for ${{ needs.init.outputs.tag }}"
