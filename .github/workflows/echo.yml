@@ -10,7 +10,9 @@ on:
     
   release:
     types:
-      - published
+      - published 
+      - prereleased
+      - released
     
   workflow_dispatch:
 
