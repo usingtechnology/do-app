@@ -27,4 +27,18 @@ jobs:
         run: echo ${{ github.ref }}
       - name: "echo github.event_name"
         run: echo ${{ github.event_name }}
-        
+
+       - name: Parse semver string
+         id: semver_parser 
+         uses: booxmedialtd/ws-action-parse-semver@v1
+         with:
+           input_string: ${{ github.ref }}
+           version_extractor_regex: '\/v(.*)$'
+       - name: Use parsed semver
+         run: |
+              echo "v${{ steps.semver_parser.outputs.major }}"
+              echo "v${{ steps.semver_parser.outputs.minor }}"
+              echo "v${{ steps.semver_parser.outputs.patch }}"
+              echo "v${{ steps.semver_parser.outputs.prerelease }}"
+              echo "v${{ steps.semver_parser.outputs.build }}"
+              echo "v${{ steps.semver_parser.outputs.fullversion }}"        
