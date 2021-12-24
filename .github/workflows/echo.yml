@@ -13,57 +13,62 @@ on:
 jobs:
   init:
     runs-on: ubuntu-20.04
+    env:
+      GITHUB_CONTEXT: ${{ toJson(github) }}
+      CI_CD_TARGET: ''
+      CI_SHORT_SHA: ''
+      CI_IS_RELEASE: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
+      CI_PRERELEASE: ''
     steps:
-      - name: Show GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
 
-      - name: "set short_sha"
-        run: echo "short_sha=${GITHUB_SHA::7}" >> $GITHUB_ENV
+      - name: set CI_SHORT_SHA
+        run: echo "CI_SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
-      - name: "set cd_target (dev)"
-        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
-        run: echo "cd_target=dev" >> $GITHUB_ENV
-      
-      - name: check release tag
-        run: echo "is_release=${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}" >> $GITHUB_ENV
-      
       - name: Parse semver string
-        if: ${{ fromJSON(env.is_release) }}
+        if: ${{ fromJSON(env.CI_IS_RELEASE) }}
         continue-on-error: true
         id: semver_parser 
         uses: booxmedialtd/ws-action-parse-semver@v1
         with:
           input_string: ${{ github.ref }}
           version_extractor_regex: '\/v(.*)$'   
-          
-      - name: Use parsed semver
+
+      - name: set CI_PRERELEASE 
+        if: ${{ steps.semver_parser.outputs.prerelease != null }}
         run: |
-            echo "${{ steps.semver_parser.outputs.major }}"
-            echo "${{ steps.semver_parser.outputs.minor }}"
-            echo "${{ steps.semver_parser.outputs.patch }}"
-            echo "${{ steps.semver_parser.outputs.prerelease }}"
-            echo "${{ steps.semver_parser.outputs.build }}"
-            echo "${{ steps.semver_parser.outputs.fullversion }}"
-            
-      - name: "set cd_target (test)"
-        if: ${{ fromJSON(env.is_release) }} && ${{ fromJSON(steps.semver_parser.outputs.prerelease) }}
-        run: echo "cd_target=${{ steps.semver_parser.outputs.prerelease }}" >> $GITHUB_ENV
+          echo "CI_PRERELEASE=${{ steps.semver_parser.outputs.prerelease }}" >> $GITHUB_ENV
+
+      - name: print release config
+        run: |
+          echo "Is release: ${{ env.CI_IS_RELEASE }}"
+          echo "Pre-release: ${{ env.CI_PRERELEASE }}"
+
+      - name: set CI_CD_TARGET (dev)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        run: echo "CI_CD_TARGET=dev" >> $GITHUB_ENV
+
+      - name: set CI_CD_TARGET (test)
+        if: ${{ fromJSON(env.CI_IS_RELEASE) && env.CI_PRERELEASE != '' }}
+        run: |
+          echo "CI_CD_TARGET=$CI_PRERELEASE" >> $GITHUB_ENV
  
-      - name: "set cd_target (prod)"
-        if: ${{ fromJSON(env.is_release) }} && !${{ fromJSON(steps.semver_parser.outputs.prerelease) }}
-        run: echo "cd_target=prod" >> $GITHUB_ENV
+      - name: set CI_CD_TARGET (prod)
+        if: ${{ fromJSON(env.CI_IS_RELEASE) && env.CI_PRERELEASE == '' }}
+        run: echo "CI_CD_TARGET=prod" >> $GITHUB_ENV
     
-      - name: "set cd_target (none)"
-        if: github.event_name == 'workflow_dispatch'
-        run: echo "cd_target=none" >> $GITHUB_ENV
-    
+      - name: set CI_CD_TARGET (workflow)
+        if: ${{ !fromJSON(env.CI_IS_RELEASE) && github.event_name == 'workflow_dispatch' }}
+        run: echo "CI_CD_TARGET=workflow" >> $GITHUB_ENV
+          
+      - name: print outputs
+        run: |
+          echo "Short SHA: ${{ env.CI_SHORT_SHA }}"
+          echo "CI CD Target: ${{ env.CI_CD_TARGET }}"          
+
     outputs:
-      short_sha: ${{ env.short_sha }}
-      cd_target: ${{ env.cd_target }}
-    
-    
+      short_sha: ${{ env.CI_SHORT_SHA }}
+      cd_target: ${{ env.CI_CD_TARGET }}
+
   echo:
      # The type of runner that the job will run on
     runs-on: ubuntu-20.04
@@ -73,3 +78,4 @@ jobs:
         run: |
             echo "${{needs.init.outputs.short_sha }}"
             echo "${{needs.init.outputs.cd_target }}"
+
