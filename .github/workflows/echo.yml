@@ -1,0 +1,26 @@
+name: echo
+on:
+  push:
+    branches: 
+      - develop
+    paths-ignore:
+      - '.github/**'
+    tags:
+      - '*'
+    
+  release:
+    
+  workflow_dispatch:
+
+jobs:
+  init:
+    runs-on: ubuntu-20.04
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      # will need some work here to determine what CD we kick off... 
+      - name: "echo github"
+        run: echo ${{ github }}
+      - name: "echo event"
+        run: echo ${{ github.event }}
+
