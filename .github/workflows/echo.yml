@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v2
       # will need some work here to determine what CD we kick off... 
       - name: "echo github"
-        run: echo ${{ github }}
+        run: echo ${{ toJSON(github) }}
       - name: "echo event"
-        run: echo ${{ github.event }}
+        run: echo ${{ toJSON(github.event) }}
 
