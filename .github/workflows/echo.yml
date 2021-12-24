@@ -25,22 +25,34 @@ jobs:
       - name: "set cd_target (dev)"
         if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
         run: echo "cd_target=dev" >> $GITHUB_ENV
-        
+      
+      - name: check release tag
+        run: echo "is_release=${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}" >> $GITHUB_ENV
+      
       - name: Parse semver string
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+        if: ${{ env.is_release }}
         continue-on-error: true
         id: semver_parser 
         uses: booxmedialtd/ws-action-parse-semver@v1
         with:
           input_string: ${{ github.ref }}
-          version_extractor_regex: '\/v(.*)$'       
-
+          version_extractor_regex: '\/v(.*)$'   
+          
+      - name: Use parsed semver
+        run: |
+            echo "${{ steps.semver_parser.outputs.major }}"
+            echo "${{ steps.semver_parser.outputs.minor }}"
+            echo "${{ steps.semver_parser.outputs.patch }}"
+            echo "${{ steps.semver_parser.outputs.prerelease }}"
+            echo "${{ steps.semver_parser.outputs.build }}"
+            echo "${{ steps.semver_parser.outputs.fullversion }}"
+            
       - name: "set cd_target (test)"
-        if: ${{ steps.semver_parser.outputs.prerelease }}
+        if: ${{ env.is_release }} && ${{ steps.semver_parser.outputs.prerelease }}
         run: echo "cd_target=${{ steps.semver_parser.outputs.prerelease }}" >> $GITHUB_ENV
  
       - name: "set cd_target (prod)"
-        if: ${{ steps.semver_parser.outputs.fullversion }} && !${{ steps.semver_parser.outputs.prerelease }}
+        if: ${{ env.is_release }} && !${{ steps.semver_parser.outputs.prerelease }}
         run: echo "cd_target=prod" >> $GITHUB_ENV
     
       - name: "set cd_target (none)"
