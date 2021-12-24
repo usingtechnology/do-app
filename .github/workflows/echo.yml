@@ -9,6 +9,7 @@ on:
       - '*'
     
   release:
+    - published
     
   workflow_dispatch:
 
