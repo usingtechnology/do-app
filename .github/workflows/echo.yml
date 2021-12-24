@@ -20,11 +20,11 @@ jobs:
         run: echo "$GITHUB_CONTEXT"
 
       - name: "set short_sha"
-        run: echo '::set-output name=short_sha::${GITHUB_SHA::7}'
+        run: echo "short_sha=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
       - name: "set cd_target (dev)"
         if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
-        run: echo '::set-output name=cd_target::dev'
+        run: echo "cd_target=dev" >> $GITHUB_ENV
         
       - name: Parse semver string
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
@@ -37,19 +37,19 @@ jobs:
 
       - name: "set cd_target (test)"
         if: ${{ steps.semver_parser.outputs.prerelease }}
-        run: echo '::set-output name=cd_target::${{ steps.semver_parser.outputs.prerelease }}'
+        run: echo "cd_target=${{ steps.semver_parser.outputs.prerelease }}" >> $GITHUB_ENV
  
       - name: "set cd_target (prod)"
         if: ${{ steps.semver_parser.outputs.fullversion }} && !${{ steps.semver_parser.outputs.prerelease }}
-        run: echo '::set-output name=cd_target::prod'
+        run: echo "cd_target=prod" >> $GITHUB_ENV
     
       - name: "set cd_target (none)"
         if: github.event_name == 'workflow_dispatch'
-        run: echo '::set-output name=cd_target::none'
+        run: echo "cd_target=none" >> $GITHUB_ENV
     
     outputs:
-      short_sha: 'default'
-      cd_target: 'default'
+      short_sha: ${{ env.short_sha }}
+      cd_target: ${{ env.cd_target }}
     
     
   echo:
