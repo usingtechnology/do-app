@@ -16,12 +16,17 @@ jobs:
   init:
     runs-on: ubuntu-20.04
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-      # will need some work here to determine what CD we kick off... 
+      - name: Show GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
       - name: "echo github.sha"
         run: echo ${{ github.sha }}
+      - name: "echo github.sha short"
+        run: echo ${GITHUB_SHA::7}
       - name: "echo github.ref"
         run: echo ${{ github.ref }}
       - name: "echo github.event_name"
         run: echo ${{ github.event_name }}
+        
