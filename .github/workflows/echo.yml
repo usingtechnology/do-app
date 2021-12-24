@@ -19,8 +19,9 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
       # will need some work here to determine what CD we kick off... 
-      - name: "echo github"
-        run: echo ${{ toJSON(github) }}
-      - name: "echo event"
-        run: echo ${{ toJSON(github.event) }}
-
+      - name: "echo github.sha"
+        run: echo ${{ github.sha }}
+      - name: "echo github.ref"
+        run: echo ${{ github.ref }}
+      - name: "echo github.event_name"
+        run: echo ${{ github.event_name }}
