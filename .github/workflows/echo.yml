@@ -55,6 +55,6 @@ jobs:
     needs: init
     steps:
       - name: echo outputs
-      - run: |
+        run: |
             echo "${{needs.init.outputs.short_sha }}"
             echo "${{needs.init.outputs.cd_target }}"
