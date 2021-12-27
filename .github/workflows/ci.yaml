@@ -60,8 +60,7 @@ jobs:
           echo "CI_IS_PROD: ${{ env.CI_IS_PROD }}"  
           echo "CI_VERSION: ${{ env.CI_VERSION }}"  
           echo "CI_PRERELEASE: ${{ env.CI_PRERELEASE }}"  
-          echo "CI_BUILD: ${{ env.CI_BUILD }}" 
-          echo "${{ github.repository }}" 
+          echo "CI_BUILD: ${{ env.CI_BUILD }}"  
 
     outputs:
       image_sha: ${{ env.CI_IMAGE_SHA }}
@@ -75,12 +74,12 @@ jobs:
       build_no: ${{ env.CI_BUILD }}
 
   build_holder:
-    uses: ${{ github.repository }}/.github/workflows/build_service.yaml@develop
+    uses: usingtechnology/do-app/.github/workflows/build_service.yaml@develop
     needs: init
     if: ${{ fromJSON(needs.init.outputs.is_dev) || fromJSON(needs.init.outputs.is_preview) }}
     with:
       context: './services/holder'
-      image_name: ${{ github.repository }}/traction-holder
+      image_name: usingtechnology/do-app/traction-holder
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
 
