@@ -79,7 +79,7 @@ jobs:
     if: ${{ fromJSON(needs.init.outputs.is_dev) || fromJSON(needs.init.outputs.is_preview) }}
     with:
       context: './services/holder'
-      image_name: 'traction-holder'
+      image_name: "${{ github.respository }}/traction-holder"
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
 
