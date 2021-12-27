@@ -1,3 +1,3 @@
-    
-    def test_hello_world():
-        assert true
+
+def test_hello_world():
+    assert true
