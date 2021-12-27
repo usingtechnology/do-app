@@ -1,0 +1,23 @@
+name: release
+
+on:
+
+  release:
+    types: 
+      - published 
+      - unpublished 
+      - created 
+      - edited 
+      - deleted 
+      - prereleased
+      - released
+
+jobs:
+    
+  init:
+    runs-on: ubuntu-20.04
+    env:
+      GITHUB_CONTEXT: ${{ toJson(github) }}
+    steps:
+        run: |
+          echo $GITHUB_CONTEXT
