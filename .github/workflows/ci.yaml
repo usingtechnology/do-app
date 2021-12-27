@@ -16,9 +16,6 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-env:
-  BUILD_JOB: usingtechnology/do-app/.github/workflows/build_service.yaml@develop
-
 jobs:
     
   init:
@@ -34,6 +31,7 @@ jobs:
       CI_VERSION: ''
       CI_PRERELEASE: ''
       CI_BUILD: ''
+      CD_CONFIG: 'workflow'
     steps:
       - name: Parse semver string
         if: ${{ fromJSON(env.CI_IS_RELEASE) }}
@@ -53,6 +51,26 @@ jobs:
           echo "CI_PRERELEASE=${{ steps.semver_parser.outputs.prerelease }}" >> $GITHUB_ENV
           echo "CI_BUILD=${{ steps.semver_parser.outputs.build }}" >> $GITHUB_ENV
 
+      - name: set cd config (preview)
+        if: ${{ fromJSON(env.CI_IS_PREVIEW) }}
+        run: |
+          echo "CD_CONFIG=pr" >> $GITHUB_ENV
+
+      - name: set cd config (dev)
+        if: ${{ fromJSON(env.CI_IS_DEV) }}
+        run: |
+          echo "CD_CONFIG=dev" >> $GITHUB_ENV
+
+      - name: set cd config (test)
+        if: ${{ fromJSON(env.CI_IS_TEST) }}
+        run: |
+          echo "CD_CONFIG=${{ env.CI_PRERELEASE }}" >> $GITHUB_ENV
+
+      - name: set cd config (prod)
+        if: ${{ fromJSON(env.CI_IS_PROD) }}
+        run: |
+          echo "CD_CONFIG=prod" >> $GITHUB_ENV
+
       - name: print outputs
         run: |
           echo "CI_IMAGE_SHA: ${{ env.CI_IMAGE_SHA }}"
@@ -63,8 +81,8 @@ jobs:
           echo "CI_IS_PROD: ${{ env.CI_IS_PROD }}"  
           echo "CI_VERSION: ${{ env.CI_VERSION }}"  
           echo "CI_PRERELEASE: ${{ env.CI_PRERELEASE }}"  
-          echo "CI_BUILD: ${{ env.CI_BUILD }}"  
-          echo $GITHUB_REPOSITORY
+          echo "CI_BUILD: ${{ env.CI_BUILD }}" 
+          echo "CD_CONFIG: ${{ env.CD_CONFIG }}"
 
     outputs:
       image_sha: ${{ env.CI_IMAGE_SHA }}
@@ -73,66 +91,61 @@ jobs:
       is_dev: ${{ env.CI_IS_DEV }}
       is_test: ${{ env.CI_IS_TEST }}
       is_prod: ${{ env.CI_IS_PROD }}
+      cd_config: ${{ env.CD_CONFIG }}
       version_no: ${{ env.CI_VERSION }}
       prerelease: ${{ env.CI_PRERELEASE }}
       build_no: ${{ env.CI_BUILD }}
+      cd_config: ${{ env.CD_CONFIG }}
 
   build_holder:
-    uses: $BUILD_JOB
+    uses: usingtechnology/do-app/.github/workflows/build_service.yaml@develop
     needs: init
     if: ${{ fromJSON(needs.init.outputs.is_dev) || fromJSON(needs.init.outputs.is_preview) }}
     with:
       context: './services/holder'
-      image_name: $GITHUB_REPOSITORY/traction-holder
+      image_name: usingtechnology/do-app/traction-holder
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
 
   build_verifier:
-    uses: $BUILD_JOB
+    uses: usingtechnology/do-app/.github/workflows/build_service.yaml@develop
     needs: init
     if: ${{ fromJSON(needs.init.outputs.is_dev) || fromJSON(needs.init.outputs.is_preview) }}
     with:
       context: './services/verifier'
-      image_name: $GITHUB_REPOSITORY/traction-verifier
+      image_name: usingtechnology/do-app/traction-verifier
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
 
 
-  echo:
+  update_config:
     runs-on: ubuntu-20.04
-    needs: init
-    steps:
-      - name: echo outputs
+    needs: 
+      - init
+      - build_holder
+      - build_verifier
+    if: ${{ always() && contains(needs.*.result, 'success') && !(contains(needs.*.result, 'failure')) }}
+    
+    steps:  
+      - name: Check out config repo
+        uses: actions/checkout@v2
+        with:
+          ssh-key: ${{ secrets.MANIFEST_REPO_DEPLOY_KEY }}
+          repository: ${{ secrets.MANIFEST_REPO }}
+
+      - name: Update image ID and commit change
+        shell: bash
         run: |
-            echo "image_sha ${{needs.init.outputs.image_sha }}"
-            echo "is_preview ${{needs.init.outputs.is_preview }}"
-            echo "is_release ${{needs.init.outputs.is_release }}"
-            echo "is_dev ${{needs.init.outputs.is_dev }}"
-            echo "is_test ${{needs.init.outputs.is_test }}"
-            echo "is_prod ${{needs.init.outputs.is_prod }}"
-            echo "version_no ${{needs.init.outputs.version_no }}"
-            echo "prerelease ${{needs.init.outputs.prerelease }}"
-            echo "build_no ${{needs.init.outputs.build_no }}"
-
-      - name: is preview
-        if: ${{ fromJSON(needs.init.outputs.is_preview) }}
-        run: echo "is_preview... yes"
-
-      - name: is release
-        if: ${{ fromJSON(needs.init.outputs.is_preview) }}
-        run: echo "is_release... yes"
-
-      - name: is dev
-        if: ${{ fromJSON(needs.init.outputs.is_dev) }}
-        run: echo "is_dev... yes"
-
-      - name: is test
-        if: ${{ fromJSON(needs.init.outputs.is_test) }}
-        run: echo "is_test... yes"
-
-      - name: is prod
-        if: ${{ fromJSON(needs.init.outputs.is_prod) }}
-        run: echo "is_test... yes"
+          ls -l
+          cd charts/traction
+          ls -l
+          yq eval '.holder.image.tag = "${{ needs.init.outputs.image_sha }}"' -i values-${{ needs.init.outputs.cd_config }}.yaml
+          yq eval '.verifier.image.tag = "${{ needs.init.outputs.image_sha }}"' -i values-${{ needs.init.outputs.cd_config }}.yaml
+          cat values-${{ needs.init.outputs.cd_config }}.yaml
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -am "Update image tags for ${{ needs.init.outputs.cd_config }}"
+          git push origin
 
 
 
