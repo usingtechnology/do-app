@@ -61,7 +61,7 @@ jobs:
           echo "CI_VERSION: ${{ env.CI_VERSION }}"  
           echo "CI_PRERELEASE: ${{ env.CI_PRERELEASE }}"  
           echo "CI_BUILD: ${{ env.CI_BUILD }}"  
-          echo ${ GITHUB_REPOSITORY }
+          echo $GITHUB_REPOSITORY
 
     outputs:
       image_sha: ${{ env.CI_IMAGE_SHA }}
