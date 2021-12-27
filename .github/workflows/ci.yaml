@@ -23,11 +23,11 @@ jobs:
     env:
       GITHUB_CONTEXT: ${{ toJson(github) }}
       CI_IMAGE_SHA: ${GITHUB_SHA::7}
-      CI_IS_DEV: ${{ github.event_name == 'push' && !startsWith(github.ref, 'refs/tags/v') }}
+      CI_IS_PREVIEW: ${{ github.event_name == 'pull_request' }}
       CI_IS_RELEASE: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
+      CI_IS_DEV: ${{ github.event_name == 'push' && !startsWith(github.ref, 'refs/tags/v') }}
       CI_IS_TEST: false
       CI_IS_PROD: false
-      CI_IS_PREVIEW: ${{ github.event_name == 'pull_request' }}
       CI_VERSION: ''
       CI_PRERELEASE: ''
     steps:
@@ -53,6 +53,13 @@ jobs:
           echo "CI_IS_TEST=true" >> $GITHUB_ENV
           echo "CI_IS_PROD=false" >> $GITHUB_ENV
 
-
-      - name: print env
-        run: env     
+      - name: print outputs
+        run: |
+          echo "CI_IMAGE_SHA: ${{ env.CI_IMAGE_SHA }}"
+          echo "CI_IS_PREVIEW: ${{ env.CI_IS_PREVIEW }}"  
+          echo "CI_IS_RELEASE: ${{ env.CI_IS_RELEASE }}"
+          echo "CI_IS_DEV: ${{ env.CI_IS_DEV }}"  
+          echo "CI_IS_TEST: ${{ env.CI_IS_TEST }}"  
+          echo "CI_IS_PROD: ${{ env.CI_IS_PROD }}"  
+          echo "CI_VERSION: ${{ env.CI_VERSION }}"  
+          echo "CI_PRERELEASE: ${{ env.CI_PRERELEASE }}"  
