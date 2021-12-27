@@ -74,12 +74,12 @@ jobs:
       build_no: ${{ env.CI_BUILD }}
 
   build_holder:
-    uses: usingtechnology/do-app/.github/workflows/build_service.yaml@develop
+    uses: "${{ github.repository }}/.github/workflows/build_service.yaml@develop"
     needs: init
     if: ${{ fromJSON(needs.init.outputs.is_dev) || fromJSON(needs.init.outputs.is_preview) }}
     with:
       context: './services/holder'
-      image_name: "${{ github.respository }}/traction-holder"
+      image_name: "${{ github.repository }}/traction-holder"
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
 
