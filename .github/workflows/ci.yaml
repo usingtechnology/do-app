@@ -74,7 +74,7 @@ jobs:
       build_no: ${{ env.CI_BUILD }}
 
   build_holder:
-    uses: usingtechnology/do-app/.github/workflows/build_service.yml@develop
+    uses: usingtechnology/do-app/.github/workflows/build_service.yaml@develop
     with:
       username: ${{ github.repository_owner}}
       context: './services/holder'
