@@ -80,8 +80,6 @@ jobs:
     with:
       context: './services/holder'
       image_name: 'traction-holder'
-    secrets:
-      token: ${{ secrets.GITHUB_TOKEN }}
 
 
   echo:
