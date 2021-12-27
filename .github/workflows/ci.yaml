@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
 
 env:
-  BUILD_JOB: "$GITHUB_REPOSITORY/.github/workflows/build_service.yaml@develop"
+  BUILD_JOB: usingtechnology/do-app/.github/workflows/build_service.yaml@develop
 
 jobs:
     
