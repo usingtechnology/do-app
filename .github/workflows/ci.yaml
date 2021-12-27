@@ -74,12 +74,22 @@ jobs:
       build_no: ${{ env.CI_BUILD }}
 
   build_holder:
-    uses: usingtechnology/do-app/.github/workflows/build_service.yaml@develop
+    uses: ${ GITHUB_REPOSITORY }/.github/workflows/build_service.yaml@develop
     needs: init
     if: ${{ fromJSON(needs.init.outputs.is_dev) || fromJSON(needs.init.outputs.is_preview) }}
     with:
       context: './services/holder'
-      image_name: usingtechnology/do-app/traction-holder
+      image_name: ${ GITHUB_REPOSITORY }/traction-holder
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
+
+  build_verifier:
+    uses: ${ GITHUB_REPOSITORY }/.github/workflows/build_service.yaml@develop
+    needs: init
+    if: ${{ fromJSON(needs.init.outputs.is_dev) || fromJSON(needs.init.outputs.is_preview) }}
+    with:
+      context: './services/verifier'
+      image_name: ${ GITHUB_REPOSITORY }/traction-verifier
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
 
