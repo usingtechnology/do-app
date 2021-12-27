@@ -75,8 +75,9 @@ jobs:
 
   build_holder:
     uses: usingtechnology/do-app/.github/workflows/build_service.yaml@develop
+    needs: init
+    if: ${{ fromJSON(needs.init.outputs.is_dev) || fromJSON(needs.init.outputs.is_preview) }}
     with:
-      username: ${{ github.repository_owner}}
       context: './services/holder'
       image_name: 'traction-holder'
     secrets:
