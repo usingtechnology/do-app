@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       GITHUB_CONTEXT: ${{ toJson(github) }}
-      CI_IMAGE_SHA: ${GITHUB_SHA::7}
+      CI_IMAGE_SHA: ''
       CI_IS_PREVIEW: ${{ github.event_name == 'pull_request' }}
       CI_IS_RELEASE: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
       CI_IS_DEV: ${{ github.event_name == 'push' && !startsWith(github.ref, 'refs/tags/v') }}
@@ -70,6 +70,9 @@ jobs:
         if: ${{ fromJSON(env.CI_IS_PROD) }}
         run: |
           echo "CD_CONFIG=prod" >> $GITHUB_ENV
+
+      - name: set image sha
+        run: echo "CI_IMAGE_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
       - name: print outputs
         run: |
