@@ -95,7 +95,6 @@ jobs:
       version_no: ${{ env.CI_VERSION }}
       prerelease: ${{ env.CI_PRERELEASE }}
       build_no: ${{ env.CI_BUILD }}
-      cd_config: ${{ env.CD_CONFIG }}
 
   build_holder:
     uses: usingtechnology/do-app/.github/workflows/build_service.yaml@develop
@@ -136,8 +135,6 @@ jobs:
       - name: Update image ID and commit change
         shell: bash
         run: |
-          ls -l
-          cd charts/traction
           ls -l
           yq eval '.holder.image.tag = "${{ needs.init.outputs.image_sha }}"' -i values-${{ needs.init.outputs.cd_config }}.yaml
           yq eval '.verifier.image.tag = "${{ needs.init.outputs.image_sha }}"' -i values-${{ needs.init.outputs.cd_config }}.yaml
