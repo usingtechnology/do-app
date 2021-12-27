@@ -30,6 +30,7 @@ jobs:
       CI_IS_PROD: false
       CI_VERSION: ''
       CI_PRERELEASE: ''
+      CI_BUILD: ''
     steps:
       - name: Parse semver string
         if: ${{ fromJSON(env.CI_IS_RELEASE) }}
@@ -44,14 +45,10 @@ jobs:
         if: ${{ steps.semver_parser.outputs.fullversion != null }}
         run: |
           echo "CI_VERSION=${{ steps.semver_parser.outputs.major }}.${{ steps.semver_parser.outputs.minor }}.${{ steps.semver_parser.outputs.patch }}" >> $GITHUB_ENV
-          echo "CI_IS_PROD=true" >> $GITHUB_ENV
-
-      - name: set prerelease tag 
-        if: ${{ steps.semver_parser.outputs.prerelease != null }}
-        run: |
+          echo "CI_IS_PROD=${{ steps.semver_parser.outputs.prerelease == null }}" >> $GITHUB_ENV
+          echo "CI_IS_TEST=${{ steps.semver_parser.outputs.prerelease != null }}" >> $GITHUB_ENV
           echo "CI_PRERELEASE=${{ steps.semver_parser.outputs.prerelease }}" >> $GITHUB_ENV
-          echo "CI_IS_TEST=true" >> $GITHUB_ENV
-          echo "CI_IS_PROD=false" >> $GITHUB_ENV
+          echo "CI_BUILD=${{ steps.semver_parser.outputs.build }}" >> $GITHUB_ENV
 
       - name: print outputs
         run: |
@@ -63,3 +60,55 @@ jobs:
           echo "CI_IS_PROD: ${{ env.CI_IS_PROD }}"  
           echo "CI_VERSION: ${{ env.CI_VERSION }}"  
           echo "CI_PRERELEASE: ${{ env.CI_PRERELEASE }}"  
+          echo "CI_BUILD: ${{ env.CI_BUILD }}"  
+
+    outputs:
+      image_sha: ${{ env.CI_IMAGE_SHA }}
+      is_preview: ${{ env.CI_IS_PREVIEW }}
+      is_release: ${{ env.CI_IS_RELEASE }}
+      is_dev: ${{ env.CI_IS_DEV }}
+      is_test: ${{ env.CI_IS_TEST }}
+      is_prod: ${{ env.CI_IS_PROD }}
+      version_no: ${{ env.CI_VERSION }}
+      prerelease: ${{ env.CI_PRERELEASE }}
+      build_no: ${{ env.CI_BUILD }}
+
+  echo:
+    runs-on: ubuntu-20.04
+    needs: init
+    steps:
+      - name: echo outputs
+        run: |
+            echo "image_sha ${{needs.init.outputs.image_sha }}"
+            echo "is_preview ${{needs.init.outputs.is_preview }}"
+            echo "is_release ${{needs.init.outputs.is_release }}"
+            echo "is_dev ${{needs.init.outputs.is_dev }}"
+            echo "is_test ${{needs.init.outputs.is_test }}"
+            echo "is_prod ${{needs.init.outputs.is_prod }}"
+            echo "version_no ${{needs.init.outputs.version_no }}"
+            echo "prerelease ${{needs.init.outputs.prerelease }}"
+            echo "build_no ${{needs.init.outputs.build_no }}"
+
+      - name: is preview
+        if: ${{needs.init.outputs.is_preview }}
+        run: echo "is_preview... yes"
+
+      - name: is release
+        if: ${{needs.init.outputs.is_preview }}
+        run: echo "is_release... yes"
+
+      - name: is dev
+        if: ${{needs.init.outputs.is_dev }}
+        run: echo "is_dev... yes"
+
+      - name: is test
+        if: ${{needs.init.outputs.is_test }}
+        run: echo "is_test... yes"
+
+      - name: is prod
+        if: ${{needs.init.outputs.is_prod }}
+        run: echo "is_test... yes"
+
+
+
+
