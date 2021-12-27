@@ -64,8 +64,8 @@ jobs:
 
     outputs:
       image_sha: ${{ env.CI_IMAGE_SHA }}
-      is_preview: ${{ env.CI_IS_PREVIEW }}
-      is_release: ${{ env.CI_IS_RELEASE }}
+      is_preview: ${{ fromJSON(env.CI_IS_PREVIEW) }}
+      is_release: ${{ fromJSON(env.CI_IS_RELEASE) }}
       is_dev: ${{ env.CI_IS_DEV }}
       is_test: ${{ env.CI_IS_TEST }}
       is_prod: ${{ env.CI_IS_PROD }}
@@ -98,7 +98,7 @@ jobs:
         run: echo "is_release... yes"
 
       - name: is dev
-        if: ${{needs.init.outputs.is_dev }}
+        if: ${{fromJSON(needs.init.outputs.is_dev) }}
         run: echo "is_dev... yes"
 
       - name: is test
