@@ -167,13 +167,6 @@ jobs:
           context: './services/verifier'
           image_name: usingtechnology/do-app/traction-verifier
           token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: ./.github/actions/tag_image
-        name: Tagger
-        with:
-          tag: ${{ needs.init.outputs.cd_config }}
-          image_name: usingtechnology/do-app/traction-verifier
-          image_sha: ${{ needs.init.outputs.image_sha }}
-          token: ${{ secrets.GITHUB_TOKEN }}
   
   tag_verifier: 
     runs-on: ubuntu-20.04
