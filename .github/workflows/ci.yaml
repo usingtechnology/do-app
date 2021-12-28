@@ -34,6 +34,8 @@ jobs:
       CD_CONFIG: 'workflow'
     steps:
       - uses: actions/checkout@v2
+
+      - run: echo env
   
       - name: Parse semver string
         if: ${{ fromJSON(env.CI_IS_RELEASE) }}
@@ -106,7 +108,7 @@ jobs:
     needs: init    
     if: ${{ fromJSON(needs.init.outputs.is_dev) || fromJSON(needs.init.outputs.is_preview) }}
     steps:
-      - uses: ./.github/actions/qa_service
+      - uses: usingtechnology/do-app/.github/actions/qa_service
         with:
           context: './services/holder'
 
