@@ -27,4 +27,4 @@ runs:
 
     - name: add tag to image
       shell: bash
-      run: docker tag ghcr.io/${{ inputs.image_name }}:sha-${{ inputs.image_sha }} ghcr.io/${{ inputs.image_name }}:${{ inputs.tag }}
+      run: docker tag ${{ inputs.image_name }}:sha-${{ inputs.image_sha }} ghcr.io/${{ inputs.image_name }}:${{ inputs.tag }}
