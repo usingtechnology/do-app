@@ -33,11 +33,6 @@ jobs:
       CI_BUILD: ''
       CD_CONFIG: 'workflow'
     steps:
-      - uses: actions/checkout@v2
-        name: Checkout
-
-      - run: echo env
-  
       - name: Parse semver string
         if: ${{ fromJSON(env.CI_IS_RELEASE) }}
         continue-on-error: true
@@ -109,6 +104,8 @@ jobs:
     needs: init    
     if: ${{ fromJSON(needs.init.outputs.is_dev) || fromJSON(needs.init.outputs.is_preview) }}
     steps:
+      - uses: actions/checkout@v2
+        name: Checkout
       - uses: ./.github/actions/qa_service
         name: QA
         with:
@@ -119,6 +116,8 @@ jobs:
     needs: qa_holder    
     if: ${{ (fromJSON(needs.init.outputs.is_dev) || fromJSON(needs.init.outputs.is_preview)) && contains(needs.*.result, 'success') && !(contains(needs.*.result, 'failure')) }}
     steps:
+      - uses: actions/checkout@v2
+        name: Checkout
       - uses: ./.github/actions/build_service
         name: Builder
         with:
@@ -131,6 +130,8 @@ jobs:
     needs: init    
     if: ${{ fromJSON(needs.init.outputs.is_dev) || fromJSON(needs.init.outputs.is_preview) }}
     steps:
+      - uses: actions/checkout@v2
+        name: Checkout
       - uses: ./.github/actions/qa_service
         name: QA
         with:
@@ -141,6 +142,8 @@ jobs:
     needs: qa_verifier    
     if: ${{ (fromJSON(needs.init.outputs.is_dev) || fromJSON(needs.init.outputs.is_preview)) && contains(needs.*.result, 'success') && !(contains(needs.*.result, 'failure')) }}
     steps:
+      - uses: actions/checkout@v2
+        name: Checkout
       - uses: ./.github/actions/build_service
         name: Builder
         with:
