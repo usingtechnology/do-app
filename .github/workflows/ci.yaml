@@ -100,7 +100,7 @@ jobs:
       build_no: ${{ env.CI_BUILD }}
 
   qa_holder: 
-    uses: ./.github/actions/qa_service.yaml@develop
+    uses: usingtechnology/do-app/.github/actions/qa_service.yaml@develop
     needs: init
     if: ${{ fromJSON(needs.init.outputs.is_dev) || fromJSON(needs.init.outputs.is_preview) }}
     with:
