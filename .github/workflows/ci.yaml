@@ -101,9 +101,9 @@ jobs:
 
   qa_holder: 
     runs-on: ubuntu-20.04
+    needs: init    
     steps:
       - uses: ./.github/actions/qa_service.yaml@develop
-        needs: init
         if: ${{ fromJSON(needs.init.outputs.is_dev) || fromJSON(needs.init.outputs.is_preview) }}
         with:
           context: './services/holder'
