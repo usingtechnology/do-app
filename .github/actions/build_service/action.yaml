@@ -23,7 +23,7 @@ runs:
       with:
         registry: ghcr.io
         username: ${{ github.repository_owner}}
-        password: ${{ secrets.token }}
+        password: ${{ inputs.token }}
 
     - name: Prepare docker tags for holder image
       id: meta
