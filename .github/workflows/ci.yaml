@@ -206,8 +206,8 @@ jobs:
         shell: bash
         run: |
           ls -l
-          yq eval '.holder.image.tag = "${{ needs.init.outputs.image_sha }}"' -i values-${{ needs.init.outputs.cd_config }}.yaml
-          yq eval '.verifier.image.tag = "${{ needs.init.outputs.image_sha }}"' -i values-${{ needs.init.outputs.cd_config }}.yaml
+          yq eval '.holder.image.tag = "sha-${{ needs.init.outputs.image_sha }}"' -i values-${{ needs.init.outputs.cd_config }}.yaml
+          yq eval '.verifier.image.tag = "sha-${{ needs.init.outputs.image_sha }}"' -i values-${{ needs.init.outputs.cd_config }}.yaml
           cat values-${{ needs.init.outputs.cd_config }}.yaml
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
