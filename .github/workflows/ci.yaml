@@ -34,6 +34,7 @@ jobs:
       CD_CONFIG: 'workflow'
     steps:
       - uses: actions/checkout@v2
+        name: Checkout
 
       - run: echo env
   
@@ -108,7 +109,10 @@ jobs:
     needs: init    
     if: ${{ fromJSON(needs.init.outputs.is_dev) || fromJSON(needs.init.outputs.is_preview) }}
     steps:
-      - uses: usingtechnology/do-app/.github/actions/qa_service
+      - uses: actions/checkout@v2
+        name: Checkout
+      - uses: ./.github/actions/qa_service
+        name: QA
         with:
           context: './services/holder'
 
