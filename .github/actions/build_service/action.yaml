@@ -7,6 +7,9 @@ inputs:
   image_name:
     required: true
     type: string
+  image_sha:
+    required: true
+    type: string
   token:
     required: true
 
@@ -32,7 +35,8 @@ runs:
         images: ghcr.io/${{ inputs.image_name }}
         tags: |
           type=ref,event=pr
-          type=sha  
+          type=sha
+          type=raw,value=${{ inputs.image_sha }}
 
     - name: Build and push holder image
       id: builder

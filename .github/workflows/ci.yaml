@@ -123,6 +123,7 @@ jobs:
         with:
           context: './services/holder'
           image_name: usingtechnology/do-app/traction-holder
+          image_sha: ${{ needs.init.outputs.image_sha }}
           token: ${{ secrets.GITHUB_TOKEN }}
   
   tag_holder: 
@@ -166,6 +167,7 @@ jobs:
         with:
           context: './services/verifier'
           image_name: usingtechnology/do-app/traction-verifier
+          image_sha: ${{ needs.init.outputs.image_sha }}
           token: ${{ secrets.GITHUB_TOKEN }}
   
   tag_verifier: 
