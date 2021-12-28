@@ -100,11 +100,13 @@ jobs:
       build_no: ${{ env.CI_BUILD }}
 
   qa_holder: 
-    uses: usingtechnology/do-app/.github/actions/qa_service.yaml@develop
-    needs: init
-    if: ${{ fromJSON(needs.init.outputs.is_dev) || fromJSON(needs.init.outputs.is_preview) }}
-    with:
-      context: './services/holder'
+    runs-on: ubuntu-20.04
+    steps:
+      uses: ./.github/actions/qa_service.yaml@develop
+      needs: init
+      if: ${{ fromJSON(needs.init.outputs.is_dev) || fromJSON(needs.init.outputs.is_preview) }}
+      with:
+        context: './services/holder'
 
   build_holder:
     uses: usingtechnology/do-app/.github/workflows/build_service.yaml@develop
