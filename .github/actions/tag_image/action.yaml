@@ -27,4 +27,4 @@ runs:
 
     - name: add tag to image
       shell: bash
-      run: docker tag do-app/traction-holder:sha-${{ inputs.image_sha }} ghcr.io/${{ inputs.image_name }}:${{ inputs.tag }}
+      run: docker tag traction-holder:sha-${{ inputs.image_sha }} ghcr.io/${{ inputs.image_name }}:${{ inputs.tag }}
