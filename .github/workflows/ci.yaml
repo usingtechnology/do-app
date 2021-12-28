@@ -146,8 +146,7 @@ jobs:
         with:
           context: './services/verifier'
           image_name: usingtechnology/do-app/traction-verifier
-          secrets:
-            token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   update_config:
     runs-on: ubuntu-20.04
