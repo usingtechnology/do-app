@@ -109,33 +109,46 @@ jobs:
     needs: init    
     if: ${{ fromJSON(needs.init.outputs.is_dev) || fromJSON(needs.init.outputs.is_preview) }}
     steps:
-      - uses: actions/checkout@v2
-        name: Checkout
       - uses: ./.github/actions/qa_service
         name: QA
         with:
           context: './services/holder'
 
-  build_holder:
-    uses: usingtechnology/do-app/.github/workflows/build_service.yaml@develop
-    needs: init
-    if: ${{ fromJSON(needs.init.outputs.is_dev) || fromJSON(needs.init.outputs.is_preview) }}
-    with:
-      context: './services/holder'
-      image_name: usingtechnology/do-app/traction-holder
-    secrets:
-      token: ${{ secrets.GITHUB_TOKEN }}
+  build_holder: 
+    runs-on: ubuntu-20.04
+    needs: qa_holder    
+    if: ${{ (fromJSON(needs.init.outputs.is_dev) || fromJSON(needs.init.outputs.is_preview)) && contains(needs.*.result, 'success') && !(contains(needs.*.result, 'failure')) }}
+    steps:
+      - uses: ./.github/actions/build_service
+        name: Builder
+        with:
+          context: './services/holder'
+          image_name: usingtechnology/do-app/traction-holder
+        secrets:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-  build_verifier:
-    uses: usingtechnology/do-app/.github/workflows/build_service.yaml@develop
-    needs: init
+  qa_verifier: 
+    runs-on: ubuntu-20.04
+    needs: init    
     if: ${{ fromJSON(needs.init.outputs.is_dev) || fromJSON(needs.init.outputs.is_preview) }}
-    with:
-      context: './services/verifier'
-      image_name: usingtechnology/do-app/traction-verifier
-    secrets:
-      token: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: ./.github/actions/qa_service
+        name: QA
+        with:
+          context: './services/verifier'
 
+  build_verifier: 
+    runs-on: ubuntu-20.04
+    needs: qa_verifier    
+    if: ${{ (fromJSON(needs.init.outputs.is_dev) || fromJSON(needs.init.outputs.is_preview)) && contains(needs.*.result, 'success') && !(contains(needs.*.result, 'failure')) }}
+    steps:
+      - uses: ./.github/actions/build_service
+        name: Builder
+        with:
+          context: './services/verifier'
+          image_name: usingtechnology/do-app/traction-verifier
+        secrets:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   update_config:
     runs-on: ubuntu-20.04
