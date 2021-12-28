@@ -106,7 +106,7 @@ jobs:
     needs: init    
     if: ${{ fromJSON(needs.init.outputs.is_dev) || fromJSON(needs.init.outputs.is_preview) }}
     steps:
-      - uses: ${GITHUB_WORKSPACE}/.github/actions/qa_service
+      - uses: $GITHUB_WORKSPACE/.github/actions/qa_service
         with:
           context: './services/holder'
 
