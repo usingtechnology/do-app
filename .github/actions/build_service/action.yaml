@@ -7,7 +7,6 @@ inputs:
   image_name:
     required: true
     type: string
-secrets:
   token:
     required: true
 
