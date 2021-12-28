@@ -124,7 +124,6 @@ jobs:
         with:
           context: './services/holder'
           image_name: usingtechnology/do-app/traction-holder
-        secrets:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   qa_verifier: 
@@ -147,8 +146,8 @@ jobs:
         with:
           context: './services/verifier'
           image_name: usingtechnology/do-app/traction-verifier
-        secrets:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          secrets:
+            token: ${{ secrets.GITHUB_TOKEN }}
 
   update_config:
     runs-on: ubuntu-20.04
