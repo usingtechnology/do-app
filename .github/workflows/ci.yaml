@@ -167,6 +167,7 @@ jobs:
           context: './services/verifier'
           image_name: usingtechnology/do-app/traction-verifier
           image_sha: ${{ needs.init.outputs.image_sha }}
+          token: ${{ secrets.GITHUB_TOKEN }}
   
   tag_verifier: 
     runs-on: ubuntu-20.04
@@ -174,16 +175,20 @@ jobs:
       - init
       - build_verifier   
     if: ${{ always() && contains(needs.*.result, 'success') && !(contains(needs.*.result, 'failure')) }}
-    steps:
-      - uses: actions/checkout@v2
-        name: Checkout
-      - uses: ./.github/actions/tag_image
-        name: Tagger
-        with:
-          tag: ${{ needs.init.outputs.cd_config }}
-          image_name: usingtechnology/do-app/traction-verifier
-          image_sha: ${{ needs.init.outputs.image_sha }}
-          token: ${{ secrets.PACKAGE_TOKEN }}
+   permissions:
+    packages: write
+    contents: read
+  steps:
+    - name: Log in to registry
+      # This is where you will update the PAT to GITHUB_TOKEN
+      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+    - name: Push image
+      run: |
+        IMAGE_ID=ghcr.io/usingtechnology/do-app/traction-verifier
+
+        docker tag $IMAGE_ID:sha-${{ needs.init.outputs.image_sha }} $IMAGE_ID:${{ needs.init.outputs.cd_config }}
+
 
   update_config:
     runs-on: ubuntu-20.04
