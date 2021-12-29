@@ -141,14 +141,23 @@ jobs:
           username: ${{ github.actor}}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: tag image
-        run: |
-          IMAGE_ID=ghcr.io/usingtechnology/do-app-holder
-          docker image ls ghcr.io/usingtechnology/do-app-holder
-          docker image tag $IMAGE_ID:sha-${{ needs.init.outputs.image_sha }} $IMAGE_ID:${{ needs.init.outputs.cd_config }}
-          docker image push $IMAGE_ID:${{ needs.init.outputs.cd_config }}
-          docker image ls ghcr.io/usingtechnology/do-app-holder
-          
+      - name: Prepare docker tags for holder image
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ghcr.io/usingtechnology/do-app-holder:sha-${{ needs.init.outputs.image_sha }}
+          tags: |
+            type=raw,value=${{ needs.init.outputs.cd_config }} 
+
+      - name: Build and push holder image
+        id: builder
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+
   qa_verifier: 
     runs-on: ubuntu-20.04
     needs: init    
