@@ -180,7 +180,7 @@ jobs:
       contents: read
     steps:
       - name: Push To GHCR
-        uses: ./
+        uses: redhat-actions/push-to-registry@v2
         id: push
         with:
           image: ghcr.io/usingtechnology/do-app/traction-verifier:sha-${{ needs.init.outputs.image_sha }}
