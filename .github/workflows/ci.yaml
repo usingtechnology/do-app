@@ -134,17 +134,18 @@ jobs:
     if: ${{ always() && contains(needs.*.result, 'success') && !(contains(needs.*.result, 'failure')) }}
     steps:
 
-      - name: Log in to registry
-        shell: bash   
-        # This is where you will update the PAT to GITHUB_TOKEN
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner}}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Push image
-        shell: bash   
+      - name: tag image
         run: |
           IMAGE_ID=ghcr.io/usingtechnology/do-app-holder
 
-          docker tag $IMAGE_ID:sha-${{ needs.init.outputs.image_sha }} $IMAGE_ID:${{ needs.init.outputs.cd_config }}
+          docker tag do-app-holder:sha-${{ needs.init.outputs.image_sha }} $IMAGE_ID:${{ needs.init.outputs.cd_config }}
 
   qa_verifier: 
     runs-on: ubuntu-20.04
