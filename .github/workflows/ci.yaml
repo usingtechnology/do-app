@@ -190,7 +190,7 @@ jobs:
         run: |
           IMAGE_ID=ghcr.io/usingtechnology/do-app/traction-verifier
 
-          docker tag $IMAGE_ID:sha-${{ needs.init.outputs.image_sha }} $IMAGE_ID:${{ needs.init.outputs.cd_config }}
+          docker tag do-app/traction-verifier $IMAGE_ID:${{ needs.init.outputs.cd_config }}
 
 
   update_config:
