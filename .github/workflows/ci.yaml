@@ -107,7 +107,7 @@ jobs:
     if: ${{ fromJSON(needs.init.outputs.ci_build) }}
     with:
       context: './services/holder'
-      image_name: 'traction-holder'
+      image_name: 'usingtechnology/traction-holder'
       registry: ghcr.io
       username: ${{ github.repository_owner}}
     secrets:
@@ -120,7 +120,7 @@ jobs:
     if: ${{ fromJSON(needs.init.outputs.ci_build) }}
     with:
       context: './services/verifier'
-      image_name: 'traction-verifier'
+      image_name: 'usingtechnology/traction-verifier'
       registry: ghcr.io
       username: ${{ github.repository_owner}}
     secrets:
