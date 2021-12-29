@@ -141,7 +141,7 @@ jobs:
           tag: ${{ needs.init.outputs.cd_config }}
           image_name: usingtechnology/do-app/traction-holder
           image_sha: ${{ needs.init.outputs.image_sha }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PACKAGE_TOKEN }}
   
   qa_verifier: 
     runs-on: ubuntu-20.04
@@ -185,7 +185,7 @@ jobs:
           tag: ${{ needs.init.outputs.cd_config }}
           image_name: usingtechnology/do-app/traction-verifier
           image_sha: ${{ needs.init.outputs.image_sha }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PACKAGE_TOKEN }}
 
   update_config:
     runs-on: ubuntu-20.04
