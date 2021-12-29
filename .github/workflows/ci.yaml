@@ -138,14 +138,13 @@ jobs:
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
-          username: ${{ github.repository_owner}}
+          username: ${{ github.actor}}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: tag image
         run: |
           IMAGE_ID=ghcr.io/usingtechnology/do-app-holder
-
-          docker tag do-app-holder:sha-${{ needs.init.outputs.image_sha }} $IMAGE_ID:${{ needs.init.outputs.cd_config }}
+          docker pull $IMAGE_ID:sha-${{ needs.init.outputs.image_sha }}
 
   qa_verifier: 
     runs-on: ubuntu-20.04
