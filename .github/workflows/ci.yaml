@@ -101,7 +101,7 @@ jobs:
       build_no: ${{ env.CI_BUILD }}
 
   build_holder:
-    uses: usingtechnology/do-app/.github/workflows/build_service.yml@develop
+    uses: usingtechnology/do-app/.github/workflows/build_service.yaml@develop
     needs: 
       - init
     if: ${{ fromJSON(needs.init.outputs.ci_build) }}
@@ -114,7 +114,7 @@ jobs:
       password: ${{ secrets.GITHUB_TOKEN }}
 
   build_verifier:
-    uses: usingtechnology/do-app/.github/workflows/build_service.yml@develop
+    uses: usingtechnology/do-app/.github/workflows/build_service.yaml@develop
     needs: 
       - init
     if: ${{ fromJSON(needs.init.outputs.ci_build) }}
