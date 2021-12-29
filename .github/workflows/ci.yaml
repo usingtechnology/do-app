@@ -145,6 +145,8 @@ jobs:
         run: |
           IMAGE_ID=ghcr.io/usingtechnology/do-app-holder
           docker pull $IMAGE_ID:sha-${{ needs.init.outputs.image_sha }}
+          docker image ls 
+          docker tag $IMAGE_ID:sha-${{ needs.init.outputs.image_sha }} $IMAGE_ID:${{ needs.init.outputs.cd_config }}
 
   qa_verifier: 
     runs-on: ubuntu-20.04
