@@ -168,28 +168,6 @@ jobs:
           image_name: usingtechnology/do-app-verifier
           image_sha: ${{ needs.init.outputs.image_sha }}
           token: ${{ secrets.GITHUB_TOKEN }}
-  
-  tag_verifier: 
-    runs-on: ubuntu-20.04
-    needs: 
-      - init
-      - build_verifier   
-    if: ${{ always() && contains(needs.*.result, 'success') && !(contains(needs.*.result, 'failure')) }}
-    permissions:
-      packages: write
-      contents: read
-    steps:
-      - name: Push To GHCR
-        uses: redhat-actions/push-to-registry@v2
-        id: push
-        with:
-          image: do-app-verifier:sha-${{ needs.init.outputs.image_sha }}
-          tags: ${{ needs.init.outputs.cd_config }}
-          registry: ghcr.io/${{ github.repository_owner }}
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
-          extra-args: |
-            --disable-content-trust
 
   update_config:
     runs-on: ubuntu-20.04
