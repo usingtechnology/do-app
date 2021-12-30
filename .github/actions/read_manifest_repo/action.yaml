@@ -23,26 +23,29 @@ outputs:
 runs:
   using: "composite"
   steps:
-      - uses: actions/checkout@v2
+    - uses: actions/checkout@v2
 
-      - name: Check out manifest repo
-        uses: actions/checkout@v2
-        with:
-          ssh-key: ${{ secrets.MANIFEST_REPO_DEPLOY_KEY }}
-          repository: ${{ secrets.MANIFEST_REPO }}
-          path: read-manifests
-      
-      - id: holder_image_tag
-        uses: mikefarah/yq@master
-        with:
-          cmd: yq eval '.holder.image.tag' './read-manifests/values-${{ inputs.target }}.yaml'      
-      
-      - id: verifier_image_tag
-        uses: mikefarah/yq@master
-        with:
-          cmd: yq eval '.verifier.image.tag' './read-manifests/values-${{ inputs.target }}.yaml'      
+    - name: Check out manifest repo
+      uses: actions/checkout@v2
+      with:
+        ssh-key: ${{ inputs.repository_key }}
+        repository: ${{ inputs.repository }}
+        path: read-manifests
+    
+    - id: holder_image_tag
+      name: Read Holder Image tag
+      uses: mikefarah/yq@master
+      with:
+        cmd: yq eval '.holder.image.tag' './read-manifests/values-${{ inputs.target }}.yaml'      
+    
+    - id: verifier_image_tag
+      name: Read Verifier Image tag
+      uses: mikefarah/yq@master
+      with:
+        cmd: yq eval '.verifier.image.tag' './read-manifests/values-${{ inputs.target }}.yaml'      
 
-    - id: values  
+    - id: values
+      name: Set output values 
       shell: bash
       run: |
         echo "::set-output name=holder_image_tag::${{ steps.holder_image_tag.outputs.result }}"
