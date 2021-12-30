@@ -26,10 +26,14 @@ runs:
       with:
         ssh-key: ${{ inputs.repository_key }}
         repository: ${{ inputs.repository }}
+        path: manifest-repo
 
     - name: Set up git
       shell: bash
       run: |
+        ls -al
+        cd manifest-repo
+        ls -al
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
 
@@ -50,4 +54,3 @@ runs:
       run: |
         git commit -am "Update manifests for ${{ inputs.target }}"
         git push origin
-        
