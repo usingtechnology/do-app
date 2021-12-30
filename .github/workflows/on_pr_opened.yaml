@@ -62,8 +62,8 @@ jobs:
       - name: Check out manifest repo
         uses: actions/checkout@v2
         with:
-          ssh-key: ${{ inputs.repository_key }}
-          repository: ${{ inputs.repository }}
+          ssh-key: ${{ secrets.MANIFEST_REPO_DEPLOY_KEY }}
+          repository: ${{ secrets.MANIFEST_REPO }}
           path: charts-repo
 
       - name: Authenticate and set context
