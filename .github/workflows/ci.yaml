@@ -105,13 +105,13 @@ jobs:
     needs:
       - init
     steps:
+      - uses: actions/checkout@v2  
       - uses: dorny/paths-filter@v2
         id: changes
         with:
           filters: |
             src:
-              - './services/holder/**'      
-      - uses: actions/checkout@v2      
+              - './services/holder/**'          
       - name: Build node
         if: ${{ fromJSON(needs.init.outputs.ci_build) && steps.changes.outputs.src == 'true' }}
         uses: ./.github/actions/build_service
