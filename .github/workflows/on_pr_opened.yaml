@@ -7,6 +7,7 @@ on:
       - 'services/**'
     types:
       - opened
+      - edited
 
 jobs:
 
