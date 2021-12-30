@@ -101,6 +101,7 @@ jobs:
       build_no: ${{ env.CI_BUILD }}
 
   build_holder:
+    if: ${{ fromJSON(needs.init.outputs.ci_build) }}
     runs-on: ubuntu-20.04
     needs:
       - init
@@ -112,28 +113,44 @@ jobs:
           filters: |
             src:
               - './services/holder/**'          
-      - name: Build node
-        if: ${{ fromJSON(needs.init.outputs.ci_build) && steps.changes.outputs.src == 'true' }}
+      - name: Build service
+        if: steps.changes.outputs.src == 'true'
         uses: ./.github/actions/build_service
+        id: builder
         with:
           context: './services/holder'
           image_name: ${{ github.repository_owner}}/holder_image
           registry: ghcr.io
           registry_username: ${{ github.actor}}          
           registry_password: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      image_name: ${{ steps.builder.outputs.image_name }}
 
   build_verifier:
-    uses: usingtechnology/do-app/.github/workflows/build_service.yaml@develop
-    needs: 
-      - init
     if: ${{ fromJSON(needs.init.outputs.ci_build) }}
-    with:
-      context: './services/verifier'
-      image_name: 'usingtechnology/def'
-      registry: ghcr.io
-      username: ${{ github.repository_owner}}
-    secrets:
-      password: ${{ secrets.GITHUB_TOKEN }}
+    runs-on: ubuntu-20.04
+    needs:
+      - init
+    steps:
+      - uses: actions/checkout@v2  
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            src:
+              - './services/verifier/**'          
+      - name: Build service
+        if: steps.changes.outputs.src == 'true'
+        uses: ./.github/actions/build_service
+        id: builder
+        with:
+          context: './services/verifier'
+          image_name: ${{ github.repository_owner}}/verifier_image
+          registry: ghcr.io
+          registry_username: ${{ github.actor}}          
+          registry_password: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      image_name: ${{ steps.builder.outputs.image_name }}
 
   update_config:
     runs-on: ubuntu-20.04
@@ -144,22 +161,40 @@ jobs:
     if: ${{ always() && contains(needs.*.result, 'success') && !(contains(needs.*.result, 'failure')) }}
     
     steps:  
+      - name: print outputs
+        run: |
+          echo "build_holder.image_name: ${{ needs.build_holder.outputs.image_name }}"
+          echo "build_verifier.image_name: ${{ needs.build_verifier.outputs.image_name }}"
+
       - name: Check out config repo
         uses: actions/checkout@v2
         with:
           ssh-key: ${{ secrets.MANIFEST_REPO_DEPLOY_KEY }}
           repository: ${{ secrets.MANIFEST_REPO }}
 
-      - name: Update image ID and commit change
+      - name: Set up git
         shell: bash
         run: |
-          ls -l
-          yq eval '.holder.image.tag = "sha-${{ needs.init.outputs.image_sha }}"' -i values-${{ needs.init.outputs.cd_config }}.yaml
-          yq eval '.verifier.image.tag = "sha-${{ needs.init.outputs.image_sha }}"' -i values-${{ needs.init.outputs.cd_config }}.yaml
-          cat values-${{ needs.init.outputs.cd_config }}.yaml
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git commit -am "Update image tags for ${{ needs.init.outputs.cd_config }}"
+
+      - name: Update holder image
+        shell: bash
+        if: needs.build_holder.outputs.image_name != null
+        run: |
+          yq eval '.holder.image.tag = "${{ needs.build_holder.outputs.image_name }}"' -i values-${{ needs.init.outputs.cd_config }}.yaml
+          git commit -am "Update holder image tag for ${{ needs.init.outputs.cd_config }}"
+
+      - name: Update verifier image
+        shell: bash
+        if: needs.build_verifier.outputs.image_name != null
+        run: |
+          yq eval '.verifier.image.tag = "${{ needs.build_verifier.outputs.image_name }}"' -i values-${{ needs.init.outputs.cd_config }}.yaml
+          git commit -am "Update verifier image tag for ${{ needs.init.outputs.cd_config }}"
+
+      - name: Push config changes
+        shell: bash
+        run: |
           git push origin
 
 
