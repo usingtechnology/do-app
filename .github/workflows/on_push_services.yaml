@@ -70,7 +70,6 @@ jobs:
     
     steps:  
       - uses: actions/checkout@v2  
-
       - name: print outputs
         run: |
           echo "build_holder.image_tag: ${{ needs.build_holder.outputs.image_tag }}"
