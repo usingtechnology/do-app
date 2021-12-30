@@ -1,0 +1,53 @@
+name: update manifest repo
+description: Update Manifest Repository
+inputs:
+  target:
+    required: true
+    type: string
+    default: 'dev'
+  holder_image_tag:
+    required: false
+    type: string
+  verifier_image_tag:
+    required: false
+    type: string
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v2      
+    - name: print outputs
+      run: |
+        echo "holder_image_tag: ${{ inputs.holder_image_tag }}"
+        echo "verifier_image_tag: ${{ inputs.verifier_image_tag }}"
+
+    - name: Check out config repo
+      uses: actions/checkout@v2
+      with:
+        ssh-key: ${{ secrets.MANIFEST_REPO_DEPLOY_KEY }}
+        repository: ${{ secrets.MANIFEST_REPO }}
+
+    - name: Set up git
+      shell: bash
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+
+    - name: Update holder image
+      shell: bash
+      if: inputs.holder_image_tag != null
+      run: |
+        yq eval '.holder.image.tag = "${{ inputs.holder_image_tag }}"' -i values-${{ inputs.target }}.yaml
+        git commit -am "Update holder image tag for ${{ inputs.target }}"
+
+    - name: Update verifier image
+      shell: bash
+      if: inputs.verifier_image_tag != null
+      run: |
+        yq eval '.verifier.image.tag = "${{ inputs.verifier_image_tag }}"' -i values-${{ inputs.target }}.yaml
+        git commit -am "Update verifier image tag for ${{ inputs.target }}"
+
+    - name: Push config changes
+      shell: bash
+      run: |
+        git push origin
