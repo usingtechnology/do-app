@@ -124,7 +124,9 @@ jobs:
           registry_username: ${{ github.actor}}          
           registry_password: ${{ secrets.GITHUB_TOKEN }}
     outputs:
-      image_name: ${{ steps.builder.outputs.image_name }}
+      image_tag: ${{ steps.builder.outputs.image_tag }}
+      image_version: ${{ steps.builder.outputs.image_version }}
+      buildtime: ${{ steps.builder.outputs.buildtime }}
 
   build_verifier:
     if: ${{ fromJSON(needs.init.outputs.ci_build) }}
@@ -150,7 +152,9 @@ jobs:
           registry_username: ${{ github.actor}}          
           registry_password: ${{ secrets.GITHUB_TOKEN }}
     outputs:
-      image_name: ${{ steps.builder.outputs.image_name }}
+      image_tag: ${{ steps.builder.outputs.image_tag }}
+      image_version: ${{ steps.builder.outputs.image_version }}
+      buildtime: ${{ steps.builder.outputs.buildtime }}
 
   update_config:
     runs-on: ubuntu-20.04
@@ -163,8 +167,8 @@ jobs:
     steps:  
       - name: print outputs
         run: |
-          echo "build_holder.image_name: ${{ needs.build_holder.outputs.image_name }}"
-          echo "build_verifier.image_name: ${{ needs.build_verifier.outputs.image_name }}"
+          echo "build_holder.image_tag: ${{ needs.build_holder.outputs.image_tag }}"
+          echo "build_verifier.image_tag: ${{ needs.build_verifier.outputs.image_tag }}"
 
       - name: Check out config repo
         uses: actions/checkout@v2
@@ -180,16 +184,16 @@ jobs:
 
       - name: Update holder image
         shell: bash
-        if: needs.build_holder.outputs.image_name != null
+        if: needs.build_holder.outputs.image_tag != null
         run: |
-          yq eval '.holder.image.tag = "${{ needs.build_holder.outputs.image_name }}"' -i values-${{ needs.init.outputs.cd_config }}.yaml
+          yq eval '.holder.image.tag = "${{ needs.build_holder.outputs.image_tag }}"' -i values-${{ needs.init.outputs.cd_config }}.yaml
           git commit -am "Update holder image tag for ${{ needs.init.outputs.cd_config }}"
 
       - name: Update verifier image
         shell: bash
-        if: needs.build_verifier.outputs.image_name != null
+        if: needs.build_verifier.outputs.image_tag != null
         run: |
-          yq eval '.verifier.image.tag = "${{ needs.build_verifier.outputs.image_name }}"' -i values-${{ needs.init.outputs.cd_config }}.yaml
+          yq eval '.verifier.image.tag = "${{ needs.build_verifier.outputs.image_tag }}"' -i values-${{ needs.init.outputs.cd_config }}.yaml
           git commit -am "Update verifier image tag for ${{ needs.init.outputs.cd_config }}"
 
       - name: Push config changes
