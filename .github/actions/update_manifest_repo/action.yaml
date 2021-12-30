@@ -18,6 +18,9 @@ inputs:
     required: false
     type: string
 
+env:
+  REPO_PATH: manifest-repo
+
 runs:
   using: "composite"
   steps:
@@ -26,14 +29,12 @@ runs:
       with:
         ssh-key: ${{ inputs.repository_key }}
         repository: ${{ inputs.repository }}
-        path: manifest-repo
+        path: $REPO_PATH
 
     - name: Set up git
       shell: bash
       run: |
-        ls -al
-        cd manifest-repo
-        ls -al
+        cd $REPO_PATH
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
 
@@ -41,16 +42,19 @@ runs:
       shell: bash
       if: inputs.holder_image_tag != null
       run: |
+        cd $REPO_PATH
         yq eval '.holder.image.tag = "${{ inputs.holder_image_tag }}"' -i values-${{ inputs.target }}.yaml
 
     - name: Update verifier image
       shell: bash
       if: inputs.verifier_image_tag != null
       run: |
+        cd $REPO_PATH
         yq eval '.verifier.image.tag = "${{ inputs.verifier_image_tag }}"' -i values-${{ inputs.target }}.yaml
 
     - name: Push config changes
       shell: bash
       run: |
+        cd $REPO_PATH
         git commit -am "Update manifests for ${{ inputs.target }}"
         git push origin
