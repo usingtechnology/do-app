@@ -27,7 +27,7 @@ runs:
         echo "holder_image_tag: ${{ inputs.holder_image_tag }}"
         echo "verifier_image_tag: ${{ inputs.verifier_image_tag }}"
 
-    - name: Check out config repo
+    - name: Check out manifest repo
       uses: actions/checkout@v2
       with:
         ssh-key: ${{ inputs.repository_key }}
@@ -44,16 +44,15 @@ runs:
       if: inputs.holder_image_tag != null
       run: |
         yq eval '.holder.image.tag = "${{ inputs.holder_image_tag }}"' -i values-${{ inputs.target }}.yaml
-        git commit -am "Update holder image tag for ${{ inputs.target }}"
 
     - name: Update verifier image
       shell: bash
       if: inputs.verifier_image_tag != null
       run: |
         yq eval '.verifier.image.tag = "${{ inputs.verifier_image_tag }}"' -i values-${{ inputs.target }}.yaml
-        git commit -am "Update verifier image tag for ${{ inputs.target }}"
 
     - name: Push config changes
       shell: bash
       run: |
+        git commit -am "Update manifests for ${{ inputs.target }}"
         git push origin

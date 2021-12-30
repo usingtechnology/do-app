@@ -70,15 +70,6 @@ jobs:
     
     steps:  
       - uses: actions/checkout@v2  
-      - name: print outputs
-        run: |
-          echo "build_holder.image_tag: ${{ needs.build_holder.outputs.image_tag }}"
-          echo "build_holder.image_version: ${{ needs.build_holder.outputs.image_version }}"
-          echo "build_holder.buildtime: ${{ needs.build_holder.outputs.buildtime }}"
-          echo "build_verifier.image_tag: ${{ needs.build_verifier.outputs.image_tag }}"
-          echo "build_verifier.image_version: ${{ needs.build_verifier.outputs.image_version }}"
-          echo "build_verifier.buildtime: ${{ needs.build_verifier.outputs.buildtime }}"
-
       - name: Update repo
         uses: ./.github/actions/update_manifest_repo
         with:
