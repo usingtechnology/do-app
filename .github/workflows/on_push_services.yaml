@@ -9,6 +9,7 @@ on:
 jobs:
 
   build_holder:
+    name: 'Build Holder Service'
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2  
@@ -34,6 +35,7 @@ jobs:
       buildtime: ${{ steps.builder.outputs.buildtime }}
 
   build_verifier:
+    name: 'Build Verifier Service'
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2  

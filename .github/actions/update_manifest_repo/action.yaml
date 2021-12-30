@@ -17,6 +17,7 @@ runs:
   steps:
     - uses: actions/checkout@v2      
     - name: print outputs
+      shell: bash
       run: |
         echo "holder_image_tag: ${{ inputs.holder_image_tag }}"
         echo "verifier_image_tag: ${{ inputs.verifier_image_tag }}"
