@@ -15,7 +15,6 @@ on:
       username:
         required: true
         type: string
-        default: ${{ github.actor}}
     secrets:
       password:
         required: true

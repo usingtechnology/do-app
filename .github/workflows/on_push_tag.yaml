@@ -1,0 +1,96 @@
+name: on_push_tag
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:    
+  init:
+    runs-on: ubuntu-20.04
+    env:
+      CI_IS_TEST: false
+      CI_IS_PROD: false
+      CI_VERSION: ''
+      CI_PRERELEASE: ''
+      CI_BUILD: ''
+      PROMOTE_TO: 'test'
+      PROMOTE_FROM: 'dev'
+    steps:
+      - name: Parse semver string
+        continue-on-error: true
+        id: semver_parser 
+        uses: booxmedialtd/ws-action-parse-semver@v1
+        with:
+          input_string: ${{ github.ref }}
+          version_extractor_regex: '\/v(.*)$'   
+
+      - name: set version tag
+        if: ${{ steps.semver_parser.outputs.fullversion != null }}
+        run: |
+          echo "CI_VERSION=${{ steps.semver_parser.outputs.major }}.${{ steps.semver_parser.outputs.minor }}.${{ steps.semver_parser.outputs.patch }}" >> $GITHUB_ENV
+          echo "CI_IS_PROD=${{ steps.semver_parser.outputs.prerelease == null }}" >> $GITHUB_ENV
+          echo "CI_IS_TEST=${{ steps.semver_parser.outputs.prerelease != null }}" >> $GITHUB_ENV
+          echo "CI_PRERELEASE=${{ steps.semver_parser.outputs.prerelease }}" >> $GITHUB_ENV
+          echo "CI_BUILD=${{ steps.semver_parser.outputs.build }}" >> $GITHUB_ENV
+  
+      - name: set cd config (test)
+        if: ${{ fromJSON(env.CI_IS_TEST) }}
+        run: |
+          echo "PROMOTE_TO=test" >> $GITHUB_ENV
+          echo "PROMOTE_FROM=dev" >> $GITHUB_ENV
+
+      - name: set cd config (prod)
+        if: ${{ fromJSON(env.CI_IS_PROD) }}
+        run: |
+          echo "PROMOTE_TO=prod" >> $GITHUB_ENV
+          echo "PROMOTE_FROM=test" >> $GITHUB_ENV
+
+      - name: print outputs
+        run: |
+          echo "PROMOTE_FROM: ${{ env.PROMOTE_FROM }}"
+          echo "PROMOTE_TO: ${{ env.PROMOTE_TO }}"
+          echo "CI_VERSION: ${{ env.CI_VERSION }}"  
+          echo "CI_PRERELEASE: ${{ env.CI_PRERELEASE }}"  
+          echo "CI_BUILD: ${{ env.CI_BUILD }}" 
+
+    outputs:
+      promote_from: ${{ env.PROMOTE_FROM }}
+      promote_to: ${{ env.PROMOTE_TO }}
+      version_no: ${{ env.CI_VERSION }}
+      prerelease: ${{ env.CI_PRERELEASE }}
+      build_no: ${{ env.CI_BUILD }}
+
+  update_config:
+    runs-on: ubuntu-20.04
+    needs: 
+      - init
+    if: ${{ always() && contains(needs.*.result, 'success') && !(contains(needs.*.result, 'failure')) }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Check out manifest repo
+        uses: actions/checkout@v2
+        with:
+          ssh-key: ${{ secrets.MANIFEST_REPO_DEPLOY_KEY }}
+          repository: ${{ secrets.MANIFEST_REPO }}
+          path: read-manifests
+      
+      - id: holder_tag
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq eval '.holder.image.tag' './read-manifests/values-${{ needs.init.outputs.promote_from }}.yaml'      
+      
+      - id: viewer_tag
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq eval '.viewer.image.tag' './read-manifests/values-${{ needs.init.outputs.promote_from }}.yaml'      
+
+      - name: Update repo
+        uses: ./.github/actions/update_manifest_repo
+        with:
+          target: ${{ needs.init.outputs.promote_to }}
+          repository_key: ${{ secrets.MANIFEST_REPO_DEPLOY_KEY }}
+          repository: ${{ secrets.MANIFEST_REPO }}
+          holder_image_tag: ${{ steps.holder_tag.outputs.result }}
+          verifier_image_tag: ${{ steps.viewer_tag.outputs.result }}
