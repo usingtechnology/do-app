@@ -21,12 +21,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: print outputs
-      shell: bash
-      run: |
-        echo "holder_image_tag: ${{ inputs.holder_image_tag }}"
-        echo "verifier_image_tag: ${{ inputs.verifier_image_tag }}"
-
     - name: Check out manifest repo
       uses: actions/checkout@v2
       with:
@@ -56,3 +50,4 @@ runs:
       run: |
         git commit -am "Update manifests for ${{ inputs.target }}"
         git push origin
+        
