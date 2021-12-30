@@ -20,10 +20,13 @@ inputs:
 outputs:
   image_tag:
     description: "Image Tag"
-  buildtime:
-    description: "Build Time"
+    value: ${{ steps.values.outputs.image_tag }}
   image_version:
     description: "Image Version"
+    value: ${{ steps.values.outputs.image_version }}
+  buildtime:
+    description: "Build Time"
+    value: ${{ steps.values.outputs.buildtime }}
 
 runs:
   using: "composite"
@@ -83,8 +86,8 @@ runs:
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
 
-    - name: set outputs
-      shell: bash  
+    - id: values  
+      shell: bash
       run: |
         echo "::set-output name=image_tag::${{ fromJSON(steps.meta.outputs.json).tags[0] }}"
         echo "::set-output name=image_version::${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}"
