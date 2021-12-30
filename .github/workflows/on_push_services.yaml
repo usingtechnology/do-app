@@ -21,7 +21,7 @@ jobs:
               - './services/holder/**'          
       - name: Build service
         if: steps.changes.outputs.src == 'true'
-        uses: ./.github/actions/build_service@develop
+        uses: ./.github/actions/build_service
         id: builder
         with:
           context: './services/holder'
@@ -47,7 +47,7 @@ jobs:
               - './services/verifier/**'          
       - name: Build service
         if: steps.changes.outputs.src == 'true'
-        uses: ./.github/actions/build_service@develop
+        uses: ./.github/actions/build_service
         id: builder
         with:
           context: './services/verifier'
@@ -71,7 +71,7 @@ jobs:
     steps:  
       - uses: actions/checkout@v2  
       - name: Update repo
-        uses: ./.github/actions/update_manifest_repo@develop
+        uses: ./.github/actions/update_manifest_repo
         with:
           repository_key: ${{ secrets.MANIFEST_REPO_DEPLOY_KEY }}
           repository: ${{ secrets.MANIFEST_REPO }}
