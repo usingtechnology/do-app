@@ -64,7 +64,7 @@ jobs:
         with:
           ssh-key: ${{ inputs.repository_key }}
           repository: ${{ inputs.repository }}
-          path: ${{ inputs.repository_checkout_path }}
+          path: charts-repo
 
       - name: Authenticate and set context
         uses: redhat-actions/oc-login@v1
@@ -77,10 +77,8 @@ jobs:
       - name: try stuff
         run: |
           ls -al
-          cd ./${{ inputs.repository_checkout_path }}
+          cd ./charts-repo
           ls -al
-          oc get po
-          helm --help
 
 
 
