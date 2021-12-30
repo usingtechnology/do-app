@@ -31,17 +31,6 @@ runs:
         repository: ${{ inputs.repository }}
         path: ${{ env.REPO_PATH }}
 
-    - name: read dev holder tag
-      uses: mikefarah/yq@master
-      id: dev_holder_tag
-      with:
-        cmd: yq eval '.holder.image.tag' '${{ env.REPO_PATH }}/values-dev.yaml'
-    
-    - name: print dev holder tag
-      shell: bash
-      run: |
-        echo ${{ steps.dev_holder_tag.outputs.result  }}
-
     - name: Set up git
       shell: bash
       run: |
