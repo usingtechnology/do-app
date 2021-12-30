@@ -69,37 +69,14 @@ jobs:
     if: ${{ always() && contains(needs.*.result, 'success') && !(contains(needs.*.result, 'failure')) }}
     
     steps:  
-
-      - name: Check out manifest repo
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2  
+      - name: Update repo
+        uses: ./.github/actions/update_manifest_repo
         with:
-          ssh-key: ${{ secrets.MANIFEST_REPO_DEPLOY_KEY }}
+          repository_key: ${{ secrets.MANIFEST_REPO_DEPLOY_KEY }}
           repository: ${{ secrets.MANIFEST_REPO }}
-
-      - name: Set up git
-        shell: bash
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-
-      - name: Update holder image
-        shell: bash
-        if: needs.build_holder.outputs.image_tag != null
-        run: |
-          yq eval '.holder.image.tag = "${{ needs.build_holder.outputs.image_tag }}"' -i values-dev.yaml
-
-      - name: Update verifier image
-        shell: bash
-        if: needs.build_verifier.outputs.image_tag != null
-        run: |
-          yq eval '.verifier.image.tag = "${{ needs.build_verifier.outputs.image_tag }}"' -i values-dev.yaml
-
-      - name: Push config changes
-        shell: bash
-        run: |
-          git commit -am "Update manifests for dev"
-          git push origin
-
+          holder_image_tag: ${{ needs.build_holder.outputs.image_tag }}
+          verifier_image_tag: ${{ needs.build_verifier.outputs.image_tag }}
 
 
 
