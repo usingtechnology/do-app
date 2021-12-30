@@ -69,22 +69,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Check out manifest repo
-        uses: actions/checkout@v2
+      - name: Read repo
+        id: read_repo
+        uses: ./.github/actions/read_manifest_repo
         with:
-          ssh-key: ${{ secrets.MANIFEST_REPO_DEPLOY_KEY }}
-          repository: ${{ secrets.MANIFEST_REPO }}
-          path: read-manifests
-      
-      - id: holder_tag
-        uses: mikefarah/yq@master
-        with:
-          cmd: yq eval '.holder.image.tag' './read-manifests/values-${{ needs.init.outputs.promote_from }}.yaml'      
-      
-      - id: viewer_tag
-        uses: mikefarah/yq@master
-        with:
-          cmd: yq eval '.viewer.image.tag' './read-manifests/values-${{ needs.init.outputs.promote_from }}.yaml'      
+          target: ${{ needs.init.outputs.promote_from }}
+          repository_key: ${{ secrets.MANIFEST_REPO_DEPLOY_KEY }}
+          repository: ${{ secrets.MANIFEST_REPO }} 
 
       - name: Update repo
         uses: ./.github/actions/update_manifest_repo
@@ -92,5 +83,5 @@ jobs:
           target: ${{ needs.init.outputs.promote_to }}
           repository_key: ${{ secrets.MANIFEST_REPO_DEPLOY_KEY }}
           repository: ${{ secrets.MANIFEST_REPO }}
-          holder_image_tag: ${{ steps.holder_tag.outputs.result }}
-          verifier_image_tag: ${{ steps.viewer_tag.outputs.result }}
+          holder_image_tag: ${{ steps.read_repo.outputs.holder_image_tag }}
+          verifier_image_tag: ${{ steps.read_repo.outputs.verifier_image_tag }}

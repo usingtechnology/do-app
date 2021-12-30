@@ -1,0 +1,49 @@
+name: read manifest repo
+description: Read Manifest Repository
+inputs:
+  repository_key:
+    required: true
+    type: string
+  repository:
+    required: true
+    type: string
+  target:
+    required: true
+    type: string
+    default: 'dev'
+
+outputs:
+  holder_image_tag:
+    description: "Holder Image Tag"
+    value: ${{ steps.values.outputs.holder_image_tag }}
+  verifier_image_tag:
+    description: "Verifier Image Tag"
+    value: ${{ steps.values.outputs.verifier_image_tag }}
+
+runs:
+  using: "composite"
+  steps:
+      - uses: actions/checkout@v2
+
+      - name: Check out manifest repo
+        uses: actions/checkout@v2
+        with:
+          ssh-key: ${{ secrets.MANIFEST_REPO_DEPLOY_KEY }}
+          repository: ${{ secrets.MANIFEST_REPO }}
+          path: read-manifests
+      
+      - id: holder_image_tag
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq eval '.holder.image.tag' './read-manifests/values-${{ inputs.target }}.yaml'      
+      
+      - id: verifier_image_tag
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq eval '.verifier.image.tag' './read-manifests/values-${{ inputs.target }}.yaml'      
+
+    - id: values  
+      shell: bash
+      run: |
+        echo "::set-output name=holder_image_tag::${{ steps.holder_image_tag.outputs.result }}"
+        echo "::set-output name=verifier_image_tag::${{ steps.verifier_image_tag.outputs.result }}"
