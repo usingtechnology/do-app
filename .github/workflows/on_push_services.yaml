@@ -60,7 +60,8 @@ jobs:
       image_version: ${{ steps.builder.outputs.image_version }}
       buildtime: ${{ steps.builder.outputs.buildtime }}
 
-  update_config:
+  update_manifest:
+    name: Update manifests
     runs-on: ubuntu-20.04
     needs: 
       - build_holder
@@ -79,9 +80,11 @@ jobs:
           echo "build_verifier.image_version: ${{ needs.build_verifier.outputs.image_version }}"
           echo "build_verifier.buildtime: ${{ needs.build_verifier.outputs.buildtime }}"
 
-      - name: Update manifests
+      - name: Update repo
         uses: ./.github/actions/update_manifest_repo
         with:
+          repository_key: ${{ secrets.MANIFEST_REPO_DEPLOY_KEY }}
+          repository: ${{ secrets.MANIFEST_REPO }}
           holder_image_tag: ${{ needs.build_holder.outputs.image_tag }}
           verifier_image_tag: ${{ needs.build_verifier.outputs.image_tag }}
 

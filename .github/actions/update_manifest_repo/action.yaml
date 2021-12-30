@@ -1,6 +1,12 @@
 name: update manifest repo
 description: Update Manifest Repository
 inputs:
+  repository_key:
+    required: true
+    type: string
+  repository:
+    required: true
+    type: string
   target:
     required: true
     type: string
@@ -25,8 +31,8 @@ runs:
     - name: Check out config repo
       uses: actions/checkout@v2
       with:
-        ssh-key: ${{ secrets.MANIFEST_REPO_DEPLOY_KEY }}
-        repository: ${{ secrets.MANIFEST_REPO }}
+        ssh-key: ${{ inputs.repository_key }}
+        repository: ${{ inputs.repository }}
 
     - name: Set up git
       shell: bash
