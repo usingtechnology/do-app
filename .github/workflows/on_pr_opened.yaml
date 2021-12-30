@@ -14,6 +14,7 @@ jobs:
     name: 'Build Holder Service'
     runs-on: ubuntu-20.04
     steps:      
+      - uses: actions/checkout@v2        
       - name: Build service
         uses: ./.github/actions/build_service
         id: builder
