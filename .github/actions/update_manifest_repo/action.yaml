@@ -7,6 +7,14 @@ inputs:
   repository:
     required: true
     type: string
+  repository_checkout_path:
+    required: true
+    type: string
+    default: manifests-repo
+  charts_path:
+    required: true
+    type: string
+    default: charts/traction
   target:
     required: true
     type: string
@@ -26,12 +34,12 @@ runs:
       with:
         ssh-key: ${{ inputs.repository_key }}
         repository: ${{ inputs.repository }}
-        path: manifest-repo
+        path: ${{ inputs.repository_checkout_path }}
 
     - name: Set up git
       shell: bash
       run: |
-        cd manifest-repo
+        cd ./${{ inputs.repository_checkout_path }}
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
 
@@ -39,19 +47,19 @@ runs:
       shell: bash
       if: inputs.holder_image_tag != null
       run: |
-        cd manifest-repo
+        cd ./${{ inputs.repository_checkout_path }}/${{ inputs.charts_path }}
         yq eval '.holder.image.tag = "${{ inputs.holder_image_tag }}"' -i values-${{ inputs.target }}.yaml
 
     - name: Update verifier image
       shell: bash
       if: inputs.verifier_image_tag != null
       run: |
-        cd manifest-repo
+        cd ./${{ inputs.repository_checkout_path }}/${{ inputs.charts_path }}
         yq eval '.verifier.image.tag = "${{ inputs.verifier_image_tag }}"' -i values-${{ inputs.target }}.yaml
 
     - name: Push config changes
       shell: bash
       run: |
-        cd manifest-repo
+        cd ./${{ inputs.repository_checkout_path }}
         git commit -am "Update manifests for ${{ inputs.target }}"
         git push origin

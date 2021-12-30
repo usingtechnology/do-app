@@ -7,10 +7,19 @@ inputs:
   repository:
     required: true
     type: string
+  repository_checkout_path:
+    required: true
+    type: string
+    default: read-manifests
+  charts_path:
+    required: true
+    type: string
+    default: charts/traction
   target:
     required: true
     type: string
     default: 'dev'
+
 
 outputs:
   holder_image_tag:
@@ -30,19 +39,19 @@ runs:
       with:
         ssh-key: ${{ inputs.repository_key }}
         repository: ${{ inputs.repository }}
-        path: read-manifests
+        path: ${{ inputs.repository_checkout_path }}
     
     - id: holder_image_tag
       name: Read Holder Image tag
       uses: mikefarah/yq@master
       with:
-        cmd: yq eval '.holder.image.tag' './read-manifests/values-${{ inputs.target }}.yaml'      
+        cmd: yq eval '.holder.image.tag' './${{ inputs.repository_checkout_path }}/${{ inputs.charts_path }}/values-${{ inputs.target }}.yaml'      
     
     - id: verifier_image_tag
       name: Read Verifier Image tag
       uses: mikefarah/yq@master
       with:
-        cmd: yq eval '.verifier.image.tag' './read-manifests/values-${{ inputs.target }}.yaml'      
+        cmd: yq eval '.verifier.image.tag' './${{ inputs.repository_checkout_path }}/${{ inputs.charts_path }}/values-${{ inputs.target }}.yaml'      
 
     - id: values
       name: Set output values 

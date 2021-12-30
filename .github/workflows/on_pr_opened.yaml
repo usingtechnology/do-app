@@ -1,0 +1,85 @@
+name: Pull Request on Develop
+on:
+  pull_request:
+    branches:
+      - develop
+    paths:
+      - 'services/**'
+    types:
+      - opened
+
+jobs:
+
+  build_holder:
+    name: 'Build Holder Service'
+    runs-on: ubuntu-20.04
+    steps:      
+      - name: Build service
+        uses: ./.github/actions/build_service
+        id: builder
+        with:
+          context: './services/holder'
+          image_name: ${{ github.repository_owner}}/holder_image
+          registry: ghcr.io
+          registry_username: ${{ github.actor}}          
+          registry_password: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      image_tag: ${{ steps.builder.outputs.image_tag }}
+      image_version: ${{ steps.builder.outputs.image_version }}
+      buildtime: ${{ steps.builder.outputs.buildtime }}
+
+  build_verifier:
+    name: 'Build Verifier Service'
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2        
+      - name: Build service
+        uses: ./.github/actions/build_service
+        id: builder
+        with:
+          context: './services/verifier'
+          image_name: ${{ github.repository_owner}}/verifier_image
+          registry: ghcr.io
+          registry_username: ${{ github.actor}}          
+          registry_password: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      image_tag: ${{ steps.builder.outputs.image_tag }}
+      image_version: ${{ steps.builder.outputs.image_version }}
+      buildtime: ${{ steps.builder.outputs.buildtime }}
+
+  update_manifest:
+    name: Update manifests
+    runs-on: ubuntu-20.04
+    needs: 
+      - build_holder
+      - build_verifier
+    if: ${{ always() && contains(needs.*.result, 'success') && !(contains(needs.*.result, 'failure')) }}
+    
+    steps:  
+      - uses: actions/checkout@v2  
+      - name: Check out manifest repo
+        uses: actions/checkout@v2
+        with:
+          ssh-key: ${{ inputs.repository_key }}
+          repository: ${{ inputs.repository }}
+          path: ${{ inputs.repository_checkout_path }}
+
+      - name: Authenticate and set context
+        uses: redhat-actions/oc-login@v1
+        with:
+          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
+          openshift_token: ${{ secrets.OPENSHIFT_DEPLOYER_TOKEN }}
+          certificate_authority_data: ${{ secrets.OPENSHIFT_DEPLOYER_CA }}
+          namespace: ${{ env.OPENSHIFT_NAMESPACE }}
+      
+      - name: try stuff
+        runs: |
+          ls -al
+          cd ./${{ inputs.repository_checkout_path }}
+          ls -al
+          oc get po
+          helm --help
+
+
+
+

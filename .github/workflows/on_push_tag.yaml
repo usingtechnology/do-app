@@ -6,6 +6,7 @@ on:
 
 jobs:    
   init:
+    name: Set promotion values
     runs-on: ubuntu-20.04
     env:
       CI_IS_TEST: false
@@ -61,6 +62,7 @@ jobs:
       build_no: ${{ env.CI_BUILD }}
 
   update_config:
+    name: Update manifests
     runs-on: ubuntu-20.04
     needs: 
       - init
