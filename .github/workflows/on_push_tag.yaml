@@ -13,7 +13,6 @@ jobs:
       CI_IS_PROD: false
       CI_VERSION: ''
       CI_PRERELEASE: ''
-      CI_BUILD: ''
       PROMOTE_TO: 'test'
       PROMOTE_FROM: 'dev'
     steps:
@@ -28,11 +27,10 @@ jobs:
       - name: set version tag
         if: ${{ steps.semver_parser.outputs.fullversion != null }}
         run: |
-          echo "CI_VERSION=${{ steps.semver_parser.outputs.major }}.${{ steps.semver_parser.outputs.minor }}.${{ steps.semver_parser.outputs.patch }}" >> $GITHUB_ENV
+          echo "CI_VERSION=${{ steps.semver_parser.outputs.fullversion }}" >> $GITHUB_ENV
           echo "CI_IS_PROD=${{ steps.semver_parser.outputs.prerelease == null }}" >> $GITHUB_ENV
           echo "CI_IS_TEST=${{ steps.semver_parser.outputs.prerelease != null }}" >> $GITHUB_ENV
           echo "CI_PRERELEASE=${{ steps.semver_parser.outputs.prerelease }}" >> $GITHUB_ENV
-          echo "CI_BUILD=${{ steps.semver_parser.outputs.build }}" >> $GITHUB_ENV
   
       - name: set cd config (test)
         if: ${{ fromJSON(env.CI_IS_TEST) }}
@@ -51,15 +49,12 @@ jobs:
           echo "PROMOTE_FROM: ${{ env.PROMOTE_FROM }}"
           echo "PROMOTE_TO: ${{ env.PROMOTE_TO }}"
           echo "CI_VERSION: ${{ env.CI_VERSION }}"  
-          echo "CI_PRERELEASE: ${{ env.CI_PRERELEASE }}"  
-          echo "CI_BUILD: ${{ env.CI_BUILD }}" 
+          echo "CI_PRERELEASE: ${{ env.CI_PRERELEASE }}"
 
     outputs:
       promote_from: ${{ env.PROMOTE_FROM }}
       promote_to: ${{ env.PROMOTE_TO }}
-      version_no: ${{ env.CI_VERSION }}
-      prerelease: ${{ env.CI_PRERELEASE }}
-      build_no: ${{ env.CI_BUILD }}
+      version: ${{ env.CI_VERSION }}
 
   update_config:
     name: Update manifests
@@ -85,9 +80,7 @@ jobs:
           target: ${{ needs.init.outputs.promote_to }}
           repository_key: ${{ secrets.MANIFEST_REPO_DEPLOY_KEY }}
           repository: ${{ secrets.MANIFEST_REPO }}
-          release_version_no: ${{ needs.init.outputs.version_no }}
-          release_prerelease: ${{ needs.init.outputs.prerelease }}
-          release_build_no: ${{ needs.init.outputs.build_no }}
+          release_version: ${{ needs.init.outputs.version }}
           holder_image_tag: ${{ steps.read_repo.outputs.holder_image_tag }}
           holder_image_version: ${{ steps.read_repo.outputs.holder_image_version }}
           holder_image_buildtime: ${{ steps.read_repo.outputs.holder_image_buildtime }}

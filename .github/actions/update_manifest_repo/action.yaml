@@ -19,13 +19,7 @@ inputs:
     required: true
     type: string
     default: 'dev'
-  release_version_no:
-    required: false
-    type: string
-  release_prerelease:
-    required: false
-    type: string
-  release_build_no:
+  release_version:
     required: false
     type: string
   holder_image_tag:
@@ -66,45 +60,10 @@ runs:
 
     - name: Update release version
       shell: bash
-      if: inputs.release_version_no != null
+      if: inputs.release_version != null
       run: |
         cd ./${{ inputs.repository_checkout_path }}/${{ inputs.charts_path }}
-        yq eval '.release.version_no = "${{ inputs.release_version_no }}"' -i values-${{ inputs.target }}.yaml
-
-    - name: Update release prerelease
-      shell: bash
-      if: inputs.release_prerelease != null
-      run: |
-        cd ./${{ inputs.repository_checkout_path }}/${{ inputs.charts_path }}
-        yq eval '.release.prerelease = "${{ inputs.release_prerelease }}"' -i values-${{ inputs.target }}.yaml
-
-    - name: Update release build number
-      shell: bash
-      if: inputs.release_build_no != null
-      run: |
-        cd ./${{ inputs.repository_checkout_path }}/${{ inputs.charts_path }}
-        yq eval '.release.build_no = "${{ inputs.release_build_no }}"' -i values-${{ inputs.target }}.yaml
-
-    - name: Update main release version
-      shell: bash
-      if: inputs.release_version_no != null && inputs.target =='prod'
-      run: |
-        cd ./${{ inputs.repository_checkout_path }}/${{ inputs.charts_path }}
-        yq eval '.release.version_no = "${{ inputs.release_version_no }}"' -i values.yaml
-
-    - name: Update main release prerelease
-      shell: bash
-      if: inputs.release_prerelease != null && inputs.target =='prod'
-      run: |
-        cd ./${{ inputs.repository_checkout_path }}/${{ inputs.charts_path }}
-        yq eval '.release.prerelease = "${{ inputs.release_prerelease }}"' -i values.yaml
-
-    - name: Update main release build number
-      shell: bash
-      if: inputs.release_build_no != null && inputs.target =='prod'
-      run: |
-        cd ./${{ inputs.repository_checkout_path }}/${{ inputs.charts_path }}
-        yq eval '.release.build_no = "${{ inputs.release_build_no }}"' -i values.yaml
+        yq eval '.release.version = "${{ inputs.release_version }}"' -i values-${{ inputs.target }}.yaml
 
     - name: Update holder image
       shell: bash

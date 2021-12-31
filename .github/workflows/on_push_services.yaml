@@ -84,9 +84,7 @@ jobs:
         with:
           repository_key: ${{ secrets.MANIFEST_REPO_DEPLOY_KEY }}
           repository: ${{ secrets.MANIFEST_REPO }}
-          release_version_no: ${{ steps.read_repo.outputs.release_version_no }}
-          release_prerelease: ${{ steps.read_repo.outputs.release_prerelease }}
-          release_build_no: ${{ steps.read_repo.outputs.release_build_no }}
+          release_version: ${{ steps.read_repo.outputs.release_version }}
           holder_image_tag: ${{ needs.build_holder.outputs.image_tag }}
           holder_image_version: ${{ needs.build_holder.outputs.image_version }}
           holder_image_buildtime: ${{ needs.build_holder.outputs.buildtime }}

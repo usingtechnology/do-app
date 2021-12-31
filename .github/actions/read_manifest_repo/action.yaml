@@ -22,15 +22,9 @@ inputs:
 
 
 outputs:
-  release_version_no:
-    description: "Release Version No"
-    value: ${{ steps.values.outputs.release_version_no }}
-  release_prerelease:
-    description: "Release Prerelease"
-    value: ${{ steps.values.outputs.release_prerelease }}
-  release_build_no:
-    description: "Release Build No"
-    value: ${{ steps.values.outputs.release_build_no }}
+  release_version:
+    description: "Release Version"
+    value: ${{ steps.values.outputs.release_version }}
   holder_image_tag:
     description: "Holder Image Tag"
     value: ${{ steps.values.outputs.holder_image_tag }}
@@ -62,20 +56,10 @@ runs:
         repository: ${{ inputs.repository }}
         path: ${{ inputs.repository_checkout_path }}
     
-    - id: release_version_no
+    - id: release_version
       uses: mikefarah/yq@master
       with:
-        cmd: yq eval '.release.version_no' './${{ inputs.repository_checkout_path }}/${{ inputs.charts_path }}/values-${{ inputs.target }}.yaml'      
-    
-    - id: release_prerelease
-      uses: mikefarah/yq@master
-      with:
-        cmd: yq eval '.release.prerelease' './${{ inputs.repository_checkout_path }}/${{ inputs.charts_path }}/values-${{ inputs.target }}.yaml'      
-    
-    - id: release_build_no
-      uses: mikefarah/yq@master
-      with:
-        cmd: yq eval '.release.build_no' './${{ inputs.repository_checkout_path }}/${{ inputs.charts_path }}/values-${{ inputs.target }}.yaml'      
+        cmd: yq eval '.release.version' './${{ inputs.repository_checkout_path }}/${{ inputs.charts_path }}/values-${{ inputs.target }}.yaml'      
 
     - id: holder_image_tag
       uses: mikefarah/yq@master
@@ -111,9 +95,7 @@ runs:
       name: Set output values 
       shell: bash
       run: |
-        echo "::set-output name=release_version_no::${{ steps.release_version_no.outputs.result }}"
-        echo "::set-output name=release_prerelease::${{ steps.release_prerelease.outputs.result }}"
-        echo "::set-output name=release_build_no::${{ steps.release_build_no.outputs.result }}"
+        echo "::set-output name=release_version::${{ steps.release_version.outputs.result }}"
         echo "::set-output name=holder_image_tag::${{ steps.holder_image_tag.outputs.result }}"
         echo "::set-output name=holder_image_version::${{ steps.holder_image_version.outputs.result }}"
         echo "::set-output name=holder_image_buildtime::${{ steps.holder_image_buildtime.outputs.result }}"
