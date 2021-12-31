@@ -3,17 +3,13 @@ on:
   pull_request:
     branches:
       - develop
-    paths:
-      - 'services/**'
-    types:
-      - closed
 
 jobs:
 
   uninstall:
     name: Uninstall PR
     runs-on: ubuntu-20.04
-    
+    if: github.event.action == 'closed'|| github.event.pull_request.merged == true
     steps:  
       - uses: actions/checkout@v2  
       - name: Check out manifest repo
