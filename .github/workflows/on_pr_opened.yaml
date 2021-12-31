@@ -76,10 +76,12 @@ jobs:
       
       - name: try stuff
         run: |
+          yq eval '.global.fullnameOverride = "pr-${{ github.event.number }}-traction"' -i ./charts-repo/charts/traction/values-pr.yaml
           yq eval '.global.tag = "pr-${{ github.event.number }}"' -i ./charts-repo/charts/traction/values-pr.yaml
+          yq eval '.postgresql.fullnameOverride = "pr-${{ github.event.number }}-traction"' -i ./charts-repo/charts/traction/values-pr.yaml
           yq eval '.holder.image.tag = "${{ needs.build_holder.outputs.image_tag }}"' -i ./charts-repo/charts/traction/values-pr.yaml
           yq eval '.verifier.image.tag = "${{ needs.build_verifier.outputs.image_tag }}"' -i ./charts-repo/charts/traction/values-pr.yaml
-          helm upgrade traction-${{ github.event.number }} ./charts-repo/charts/traction --install --wait -f ./charts-repo/charts/traction/values.yaml -f ./charts-repo/charts/traction/values-pr.yaml --debug --dry-run
+          helm upgrade -f ./charts-repo/charts/traction/values.yaml -f ./charts-repo/charts/traction/values-pr.yaml pr-${{ github.event.number }}-traction ./charts-repo/charts/traction --install --wait  --debug --dry-run
 
 
 
