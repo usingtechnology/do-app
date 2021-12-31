@@ -37,8 +37,9 @@ jobs:
       
       - name: Remove Openshift Objects 
         run: |
-          oc delete secret pr-${{ github.event.number }}-traction-acapy"
-          oc delete pvc data-pr-${{ github.event.number }}-traction-0"
+          oc delete secret pr-${{ github.event.number }}-traction-acapy          
+          oc delete pvc data-pr-${{ github.event.number }}-traction-0
+
 
 
 
