@@ -76,15 +76,10 @@ jobs:
       
       - name: try stuff
         run: |
-          ls -al
-          cd ./charts-repo/
-          ls -al
-          cd charts/traction
-          ls -al
-          yq eval '.global.tag = "pr-${{ github.event.number }}"' -i values-pr.yaml
-          yq eval '.holder.image.tag = "${{ needs.build_holder.outputs.image_tag }}"' -i values-pr.yaml
-          yq eval '.verifier.image.tag = "${{ needs.build_verifier.outputs.image_tag }}"' -i values-pr.yaml
-          helm upgrade --install --wait -f ./values.yaml -f ./values-pr.yaml traction --debug --dry-run
+          yq eval '.global.tag = "pr-${{ github.event.number }}"' -i ./charts-repo/charts/traction/values-pr.yaml
+          yq eval '.holder.image.tag = "${{ needs.build_holder.outputs.image_tag }}"' -i ./charts-repo/charts/traction/values-pr.yaml
+          yq eval '.verifier.image.tag = "${{ needs.build_verifier.outputs.image_tag }}"' -i ./charts-repo/charts/traction/values-pr.yaml
+          helm upgrade --install --wait -f ./charts-repo/charts/traction/values.yaml -f ./charts-repo/charts/traction/values-pr.yaml ./charts-repo/charts/traction --debug --dry-run
 
 
 
