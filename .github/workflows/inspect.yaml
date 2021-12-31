@@ -7,8 +7,10 @@ on:
 jobs:
   go:
     runs-on: ubuntu-20.04
+    env:
+      GITHUB_CONTEXT: ${{ toJson(github) }}
     steps:
       - name: show env
         run: env
       - name: show github
-        run: echo ${{ github }}
+        run: echo ${{ fromJson($GITHUB_CONTEXT) }}
