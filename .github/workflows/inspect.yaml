@@ -10,3 +10,5 @@ jobs:
     steps:
       - name: show env
         run: env
+      - name: show github
+        run: echo ${{ github }}
