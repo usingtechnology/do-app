@@ -10,5 +10,8 @@ jobs:
     steps:
       - name: show env
         run: env
-      - name: show github
-        run: echo ${{ fromJson(toJson(github)) }}
+      - name: show context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: |
+          echo "$GITHUB_CONTEXT"
