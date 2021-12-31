@@ -1,0 +1,12 @@
+name: inspect
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  go:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: show env
+        run: env
