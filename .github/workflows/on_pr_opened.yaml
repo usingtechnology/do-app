@@ -1,4 +1,4 @@
-name: Pull Request on Develop
+name: Install/upgrade PR Instance
 on:
   pull_request:
     branches:
@@ -59,6 +59,15 @@ jobs:
     
     steps:  
       - uses: actions/checkout@v2  
+  
+      - name: Read Production Release values
+        id: read_repo
+        uses: ./.github/actions/read_manifest_repo
+        with:
+          target: prod
+          repository_key: ${{ secrets.MANIFEST_REPO_DEPLOY_KEY }}
+          repository: ${{ secrets.MANIFEST_REPO }} 
+
       - name: Check out manifest repo
         uses: actions/checkout@v2
         with:
@@ -78,8 +87,15 @@ jobs:
         run: |
           yq eval '.global.fullnameOverride = "pr-${{ github.event.number }}-traction"' -i ./charts-repo/charts/traction/values-pr.yaml
           yq eval '.postgresql.fullnameOverride = "pr-${{ github.event.number }}-traction"' -i ./charts-repo/charts/traction/values-pr.yaml
+          yq eval '.release.version_no = "${{ steps.read_repo.outputs.release_version_no }}"' -i ./charts-repo/charts/traction/values-pr.yaml
+          yq eval '.release.prerelease = "${{ steps.read_repo.outputs.release_prerelease }}"' -i ./charts-repo/charts/traction/values-pr.yaml
+          yq eval '.release.build_no = "${{ steps.read_repo.outputs.release_build_no }}"' -i ./charts-repo/charts/traction/values-pr.yaml
           yq eval '.holder.image.tag = "${{ needs.build_holder.outputs.image_tag }}"' -i ./charts-repo/charts/traction/values-pr.yaml
+          yq eval '.holder.image.version = "${{ needs.build_holder.outputs.image_version }}"' -i ./charts-repo/charts/traction/values-pr.yaml
+          yq eval '.holder.image.buildtime = "${{ needs.build_holder.outputs.buildtime }}"' -i ./charts-repo/charts/traction/values-pr.yaml
           yq eval '.verifier.image.tag = "${{ needs.build_verifier.outputs.image_tag }}"' -i ./charts-repo/charts/traction/values-pr.yaml
+          yq eval '.verifier.image.version = "${{ needs.build_verifier.outputs.image_version }}"' -i ./charts-repo/charts/traction/values-pr.yaml
+          yq eval '.verifier.image.buildtime = "${{ needs.build_verifier.outputs.buildtime }}"' -i ./charts-repo/charts/traction/values-pr.yaml
           helm upgrade -f ./charts-repo/charts/traction/values.yaml -f ./charts-repo/charts/traction/values-pr.yaml pr-${{ github.event.number }}-traction ./charts-repo/charts/traction --install --wait
 
 

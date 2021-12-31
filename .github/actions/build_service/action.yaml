@@ -1,5 +1,5 @@
-name: 'Build Service'
-description: 'Build a Traction Service'
+name: Build Traction Service
+description: Build a Traction Service
 inputs:
   context:
     required: true

@@ -1,4 +1,4 @@
-name: Push Services to Develop
+name: Push Instance to Develop
 on:
   push:
     branches: 
@@ -76,7 +76,11 @@ jobs:
           repository_key: ${{ secrets.MANIFEST_REPO_DEPLOY_KEY }}
           repository: ${{ secrets.MANIFEST_REPO }}
           holder_image_tag: ${{ needs.build_holder.outputs.image_tag }}
+          holder_image_version: ${{ needs.build_holder.outputs.image_version }}
+          holder_image_buildtime: ${{ needs.build_holder.outputs.buildtime }}
           verifier_image_tag: ${{ needs.build_verifier.outputs.image_tag }}
+          verifier_image_version: ${{ needs.build_verifier.outputs.image_version }}
+          verifier_image_buildtime: ${{ needs.build_verifier.outputs.buildtime }}
 
 
 
