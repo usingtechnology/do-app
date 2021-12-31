@@ -70,11 +70,23 @@ jobs:
     
     steps:  
       - uses: actions/checkout@v2  
+
+      - name: Read Production Release values
+        id: read_repo
+        uses: ./.github/actions/read_manifest_repo
+        with:
+          target: prod
+          repository_key: ${{ secrets.MANIFEST_REPO_DEPLOY_KEY }}
+          repository: ${{ secrets.MANIFEST_REPO }} 
+
       - name: Update repo
         uses: ./.github/actions/update_manifest_repo
         with:
           repository_key: ${{ secrets.MANIFEST_REPO_DEPLOY_KEY }}
           repository: ${{ secrets.MANIFEST_REPO }}
+          release_version_no: ${{ steps.read_repo.outputs.release_version_no }}
+          release_prerelease: ${{ steps.read_repo.outputs.release_prerelease }}
+          release_build_no: ${{ steps.read_repo.outputs.release_build_no }}
           holder_image_tag: ${{ needs.build_holder.outputs.image_tag }}
           holder_image_version: ${{ needs.build_holder.outputs.image_version }}
           holder_image_buildtime: ${{ needs.build_holder.outputs.buildtime }}
