@@ -79,7 +79,7 @@ jobs:
           yq eval '.global.tag = "pr-${{ github.event.number }}"' -i ./charts-repo/charts/traction/values-pr.yaml
           yq eval '.holder.image.tag = "${{ needs.build_holder.outputs.image_tag }}"' -i ./charts-repo/charts/traction/values-pr.yaml
           yq eval '.verifier.image.tag = "${{ needs.build_verifier.outputs.image_tag }}"' -i ./charts-repo/charts/traction/values-pr.yaml
-          helm upgrade --install --wait -f ./charts-repo/charts/traction/values.yaml -f ./charts-repo/charts/traction/values-pr.yaml ./charts-repo/charts/traction --debug --dry-run
+          helm upgrade traction-${{ github.event.number }} ./charts-repo/charts/traction --install --wait -f ./charts-repo/charts/traction/values.yaml -f ./charts-repo/charts/traction/values-pr.yaml --debug --dry-run
 
 
 
